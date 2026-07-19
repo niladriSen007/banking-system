@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: account-service
+  kafka:
+    bootstrap-servers:
+      - localhost:9092
+    producer:
+      acks: all
+      properties:
+        delivery.timeout.ms: 120000 # 2 minutes timeout for each request
+        linger.ms: 0 # 0 ms delay between messages
+        request.timeout.ms: 30000 # 30 seconds timeout for each request
+      transaction-id-prefix: account-service-${random.value}-
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+    consumer:
+      group-id: account-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: "*"
+            use:
+              type:
+                headers: false
+            value:
+              default:
+                type: java.util.HashMap
+  flyway:
+    enabled: true
+    locations: classpath:db/migrations
+    baseline-on-migrate: true
+    validate-on-migrate: true
+    default-schema: banking
+    schemas: banking
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: banking
+  datasource:
+    url: jdbc:postgresql://localhost:5432/account_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+server:
+  port: 5001
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health, info
