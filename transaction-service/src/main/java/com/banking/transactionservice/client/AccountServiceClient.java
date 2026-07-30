@@ -3,6 +3,7 @@ package com.banking.transactionservice.client;
 import com.banking.transactionservice.dto.shared.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,6 +16,12 @@ public interface AccountServiceClient {
 
     @PatchMapping("/api/v1/accounts/{accountNumber}/debit")
     ApiResponse<BigDecimal> debitBalance(
+            @PathVariable(name = "accountNumber") Long accountNumber,
+            @RequestBody @Valid BigDecimal amount
+    );
+
+    @PatchMapping("/api/v1/{accountNumber}/credit")
+    ApiResponse<BigDecimal> creditBalance(
             @PathVariable(name = "accountNumber") Long accountNumber,
             @RequestBody @Valid BigDecimal amount
     );

@@ -13,5 +13,9 @@ public interface ITransactionService {
 
     List<TransactionResponse> getTransactionHistory(Long accountNumber);
 
-    TransactionResponse verifyOtp(String transactionId, @Valid String otp);
+    TransactionResponse verifyOtp(String transactionReferenceNumber, @Valid String otp);
+
+    Long getTotalTransactionCount(@Valid Long accountNumber);
+
+    void processCleanTransaction(String referenceNumber);
 }

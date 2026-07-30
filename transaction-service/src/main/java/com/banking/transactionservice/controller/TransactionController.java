@@ -56,13 +56,26 @@ public class TransactionController {
         );
     }
 
-    @PostMapping("/{transactionId}/verify")
-    public ResponseEntity<ApiResponse<TransactionResponse>> verifyOtp(@PathVariable(name = "transactionId") String transactionId,
-                                                           @RequestParam("otp") @Valid String otp
+    @PostMapping("/{transactionReferenceNumber}/verify")
+    public ResponseEntity<ApiResponse<TransactionResponse>> verifyOtp(
+            @PathVariable(name = "transactionReferenceNumber") String transactionReferenceNumber,
+            @RequestParam("otp") @Valid String otp
     ) {
         return ResponseEntity.ok(
                 ApiResponse.success(
-                        transactionService.verifyOtp(transactionId, otp),
+                        transactionService.verifyOtp(transactionReferenceNumber, otp),
+                        HttpStatus.OK.value()
+                )
+        );
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<ApiResponse<Long>> getTransactionCount(
+            @RequestParam(name = "accountNumber") @Valid Long accountNumber
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        transactionService.getTotalTransactionCount(accountNumber),
                         HttpStatus.OK.value()
                 )
         );
