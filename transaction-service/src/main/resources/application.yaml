@@ -1,6 +1,10 @@
 spring:
   application:
     name: transaction-service
+  config:
+    import: optional:config-server:http://localhost:8888
+  profiles:
+    active: dev
   kafka:
     bootstrap-servers:
       - localhost:9092
@@ -62,3 +66,25 @@ management:
       exposure:
         include:
           - health, info
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    lease-renewal-interval-in-seconds: 10 # The interval at which the Eureka client sends heartbeats to the Eureka server to renew its lease.
+    lease-expiration-duration-in-seconds: 30 # The duration after which the Eureka server considers the instance as expired if it doesn't receive a heartbeat.
+
+resilience4j:
+  ratelimiter:
+    instances:
+      accountServiceRateLimiter:
+        limitForPeriod: 5 # Maximum number of tokens allowed within the refresh period
+        limitRefreshPeriod: 10s # Refresh period for the rate limiter means the time window in which the tokens are replenished
+        timeoutDuration: 1s # Timeout duration for acquiring a permit means the maximum time a thread will wait to acquire a permit before throwing an exception
+  bulkhead:
+    instances:
+      accountServiceBulkhead:
+        maxConcurrentCalls: 3 # Maximum number of concurrent calls allowed
+        maxWaitDuration: 1s # Maximum time a thread will wait to acquire a permit before throwing an exception

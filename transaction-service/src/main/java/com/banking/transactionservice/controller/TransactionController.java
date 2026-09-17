@@ -5,6 +5,7 @@ import com.banking.transactionservice.dto.request.TransactionRequest;
 import com.banking.transactionservice.dto.response.TransactionResponse;
 import com.banking.transactionservice.dto.shared.ApiResponse;
 import com.banking.transactionservice.service.ITransactionService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -26,9 +27,22 @@ public class TransactionController {
 
     ITransactionService transactionService;
 
+    /**
+     * This is the endpoint to transfer the amount
+     * @param transactionRequest
+     * @return
+     */
     @PostMapping("/transfer")
+    @Operation(
+            description = "Transfer amount controller",
+            responses = {
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", ref = "successfulResponse"),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", ref = "badRequest"),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", ref = "internalServerError")
+            }
+    )
     public ResponseEntity<ApiResponse<TransactionResponse>> transferAmount(@RequestBody @Valid TransactionRequest transactionRequest) {
-        log.info("Creating account - Controller");
+        log.info("Transfer amount - Controller");
         return ResponseEntity.ok(
                 ApiResponse.success(transactionService.transferAmount(transactionRequest), HttpStatus.CREATED.value())
         );
@@ -36,6 +50,7 @@ public class TransactionController {
 
     @GetMapping("/{transactionId}")
     public ResponseEntity<ApiResponse<TransactionResponse>> getTransactionInfo(@PathVariable(name = "transactionId") @Valid String transactionId) {
+        log.info("getTransactionInfo - Controller");
         return ResponseEntity.ok(
                 ApiResponse.success(
                         transactionService.getTransactionInfo(transactionId),
@@ -48,6 +63,7 @@ public class TransactionController {
     public ResponseEntity<ApiResponse<List<TransactionResponse>>> getTransactionHistory(
             @PathVariable(name = "accountNumber") Long accountNumber
     ) {
+        log.info("getTransactionHistory - Controller");
         return ResponseEntity.ok(
                 ApiResponse.success(
                         transactionService.getTransactionHistory(accountNumber),
@@ -61,6 +77,7 @@ public class TransactionController {
             @PathVariable(name = "transactionReferenceNumber") String transactionReferenceNumber,
             @RequestParam("otp") @Valid String otp
     ) {
+        log.info("verifyOtp - Controller");
         return ResponseEntity.ok(
                 ApiResponse.success(
                         transactionService.verifyOtp(transactionReferenceNumber, otp),
@@ -73,6 +90,7 @@ public class TransactionController {
     public ResponseEntity<ApiResponse<Long>> getTransactionCount(
             @RequestParam(name = "accountNumber") @Valid Long accountNumber
     ) {
+        log.info("getTransactionCount - Controller");
         return ResponseEntity.ok(
                 ApiResponse.success(
                         transactionService.getTotalTransactionCount(accountNumber),

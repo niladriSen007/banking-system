@@ -27,6 +27,12 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(errors, HttpStatus.BAD_REQUEST.value()));
     }
 
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRateLimitExceededException(RateLimitExceededException e) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(ApiResponse.error(e.getMessage(), HttpStatus.TOO_MANY_REQUESTS.value()));
+    }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception e) {

@@ -1,6 +1,91 @@
 spring:
   application:
     name: payment-service
+  kafka:
+    bootstrap-servers:
+      - localhost:9092
+    producer:
+      acks: all
+      properties:
+        delivery.timeout.ms: 120000 # 2 minutes timeout for each request
+        linger.ms: 0 # 0 ms delay between messages
+        request.timeout.ms: 30000 # 30 seconds timeout for each request
+      transaction-id-prefix: account-service-${random.value}-
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+    consumer:
+      group-id: account-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: "*"
+            use:
+              type:
+                headers: false
+            value:
+              default:
+                type: java.util.HashMap
+  flyway:
+    enabled: true
+    locations: classpath:db/migrations
+    baseline-on-migrate: true
+    validate-on-migrate: true
+    default-schema: banking
+    schemas: banking
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: banking
+  datasource:
+    url: jdbc:postgresql://localhost:5432/payment_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
 razorpay:
-  key-id :
-  key-secret:
+  key-id: rzp_test_TbAOkeQuHOKPt3
+  key-secret: JDymbzVzONlrkzF4FHn56RLk
+server:
+  port: 5002
+account:
+  service:
+    url: http://localhost:5001
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health, info
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    lease-renewal-interval-in-seconds: 10 # The interval at which the Eureka client sends heartbeats to the Eureka server to renew its lease.
+    lease-expiration-duration-in-seconds: 30 # The duration after which the Eureka server considers the instance as expired if it doesn't receive a heartbeat.
+
+resilience4j:
+  ratelimiter:
+    instances:
+      accountServiceRateLimiter:
+        limitForPeriod: 5 # Maximum number of tokens allowed within the refresh period
+        limitRefreshPeriod: 10s # Refresh period for the rate limiter means the time window in which the tokens are replenished
+        timeoutDuration: 1s # Timeout duration for acquiring a permit means the maximum time a thread will wait to acquire a permit before throwing an exception
+  bulkhead:
+    instances:
+      accountServiceBulkhead:
+        maxConcurrentCalls: 3 # Maximum number of concurrent calls allowed
+        maxWaitDuration: 1s # Maximum time a thread will wait to acquire a permit before throwing an exception
+

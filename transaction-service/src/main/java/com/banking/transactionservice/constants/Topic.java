@@ -7,4 +7,5 @@ public class Topic {
     public static final String VERIFICATION_OTP_GENERATED_TOPIC = "transaction.otp.generated";
     public static final String FRAUD_DETECTED_TOPIC = "fraud.detected";
     public static final String FRAUD_CHECK_CLEAN_TOPIC = "fraud.check.clean";
+    public static final String VERIFICATION_REQUIRED = "verification.required";
 }

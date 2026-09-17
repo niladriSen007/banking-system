@@ -1,0 +1,115 @@
+spring:
+  kafka:
+    bootstrap-servers:
+      - localhost:9092
+    producer:
+      acks: all
+      properties:
+        delivery.timeout.ms: 120000 # 2 minutes timeout for each request
+        linger.ms: 0 # 0 ms delay between messages
+        request.timeout.ms: 30000 # 30 seconds timeout for each request
+      transaction-id-prefix: account-service-${random.value}-
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+    consumer:
+      group-id: account-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: "*"
+            use:
+              type:
+                headers: false
+            value:
+              default:
+                type: java.util.HashMap
+    flyway:
+      enabled: true
+      locations: classpath:db/migrations
+      baseline-on-migrate: true
+      validate-on-migrate: true
+      default-schema: banking
+      schemas: banking
+    jpa:
+      hibernate:
+        ddl-auto: none
+      show-sql: true
+      open-in-view: false
+      properties:
+        hibernate:
+          format_sql: true
+          dialect: org.hibernate.dialect.PostgreSQLDialect
+          default_schema: banking
+    datasource:
+      url: jdbc:postgresql://localhost:5432/payment_db
+      username: postgres
+      password: postgres
+      driver-class-name: org.postgresql.Driver
+server:
+  port: 5002
+account:
+  service:
+    url: http://localhost:5001
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health, info
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    lease-renewal-interval-in-seconds: 10 # The interval at which the Eureka client sends heartbeats to the Eureka server to renew its lease.
+    lease-expiration-duration-in-seconds: 30 # The duration after which the Eureka server considers the instance as expired if it doesn't receive a heartbeat.
+
+resilience4j:
+  ratelimiter:
+    instances:
+      accountServiceRateLimiter:
+        limitForPeriod: 5 # Maximum number of tokens allowed within the refresh period
+        limitRefreshPeriod: 10s # Refresh period for the rate limiter means the time window in which the tokens are replenished
+        timeoutDuration: 1s # Timeout duration for acquiring a permit means the maximum time a thread will wait to acquire a permit before throwing an exception
+  bulkhead:
+    instances:
+      accountServiceBulkhead:
+        maxConcurrentCalls: 3 # Maximum number of concurrent calls allowed
+        maxWaitDuration: 1s # Maximum time a thread will wait to acquire a permit before throwing an exception
+
+  retry:
+    instances:
+      accountServiceRetry:
+        maxAttempts: 3 # Maximum number of retry attempts
+        waitDuration: 2s # Wait duration between retry attempts
+        enableExponentialBackoff: true # Enable exponential backoff for retry attempts
+        exponentialBackoffMultiplier: 2.0 # Multiplier for exponential backoff
+#        enableRandomizedWait: true # Enable randomized backoff to avoid thundering herd problem with adding some jitter to the wait duration -> (exponentialBackoffMultiplier: 2.0 + randomized wait duration)
+        retryExceptions:
+          - org.springframework.web.client.HttpServerErrorException # Retry on server errors (5xx)
+          - org.springframework.web.client.ResourceAccessException # Retry on resource access issues (e.g., timeouts)
+
+  circuitbreaker:
+    instances:
+      accountServiceCircuitBreaker:
+        slidingWindowType: COUNT_BASED # Sliding window type for circuit breaker
+        slidingWindowSize: 10 # Size of the sliding window for circuit breaker
+        minimumNumberOfCalls: 5 # Minimum number of calls required before the circuit breaker can evaluate the failure rate
+        failureRateThreshold: 50 # Failure rate threshold % for opening the circuit
+        waitDurationInOpenState: 10s # Duration for which the circuit will remain open
+        permittedNumberOfCallsInHalfOpenState: 3 # Number of calls allowed when the circuit is in half-open state
+        automaticTransitionFromOpenToHalfOpenEnabled: true # Enable automatic transition from open to half-open state
+        recordExceptions:
+          - org.springframework.web.client.HttpServerErrorException # Record server errors (5xx) as failures
+          - org.springframework.web.client.ResourceAccessException # Record resource access issues (e.g., timeouts) as failures
+          - java.io.IOException # Record IO exceptions as failures
+        ignoreExceptions:
+          - org.springframework.web.client.HttpClientErrorException # Ignore client errors (4xx) to prevent circuit breaker from opening
+          - org.springframework.web.client.HttpServerErrorException$InternalServerError # Ignore specific server error (500) to prevent circuit breaker from opening
+          - java.lang.IllegalArgumentException # Ignore illegal argument exceptions to prevent circuit breaker from opening

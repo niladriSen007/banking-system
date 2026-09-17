@@ -1,0 +1,54 @@
+{
+  "name": "transaction-outbox-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+
+    "database.hostname": "postgres-transaction",
+    "database.port": "5432",
+
+    "database.user": "postgres",
+    "database.password": "postgres",
+    "database.dbname": "transaction_db",
+
+    "topic.prefix": "transaction-service",
+
+    "plugin.name": "pgoutput",
+
+    "slot.name": "transaction_outbox_slot",
+
+    "publication.name": "transaction_outbox_publication",
+
+    "table.include.list": "public.outbox_event",
+
+    "snapshot.mode": "initial",
+
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+
+    "key.converter.schemas.enable": "false",
+    "value.converter.schemas.enable": "false",
+
+    "transforms": "outbox",
+
+    "transforms.outbox.type":
+    "io.debezium.transforms.outbox.EventRouter",
+
+    "transforms.outbox.route.by.field":
+    "aggregatetype",
+
+    "transforms.outbox.route.topic.replacement":
+    "outbox.event.${routedByValue}",
+
+    "transforms.outbox.table.field.event.id":
+    "id",
+
+    "transforms.outbox.table.field.event.key":
+    "aggregateid",
+
+    "transforms.outbox.table.field.event.payload":
+    "payload",
+
+    "transforms.outbox.table.field.event.timestamp":
+    "timestamp"
+  }
+}

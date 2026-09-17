@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/banking-system.iml" filepath="$PROJECT_DIR$/.idea/banking-system.iml" />
+      <module fileurl="file://$PROJECT_DIR$/centralize-config/centralize-config.iml" filepath="$PROJECT_DIR$/centralize-config/centralize-config.iml" />
     </modules>
   </component>
 </project>

@@ -1,3 +1,41 @@
 spring:
   application:
     name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: transaction-service
+              uri: lb://TRANSACTION-SERVICE
+              predicates:
+                - Path=/api/v1/transaction/**
+#              filters:
+#                - StripPrefix=2
+  main:
+    allow-bean-definition-overriding: true
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+
+jwt:
+  issuer: banking-auth-service
+  audience: banking-api
+
+  # Keep this outside the application JAR in production.
+  public-key-location: classpath:public-key.pem
+
+  # 15 minutes
+  clock-skew-seconds: 30
+
+  public-paths:
+    - /api/v1/auth/login
+    - /api/v1/auth/register
+    - /api/v1/actuator/health
+
+server:
+  port: 8000
+

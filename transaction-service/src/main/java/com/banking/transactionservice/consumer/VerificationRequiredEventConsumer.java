@@ -32,7 +32,18 @@ public class VerificationRequiredEventConsumer {
     SendOtpProducer sendOtpProducer;
     static long OTP_EXPIRY_MINUTES = 5;
 
-    @KafkaListener(topics = "verification.required", groupId = "verification-required-group")
+
+    /**
+     * This method listens to the "verification.required" topic for VerificationRequiredEvent messages.
+     * When a message is received, it retrieves the corresponding transaction from the database using the reference number from the payload.
+     * - If the transaction is in PROCESSING status,
+     *      - it generates a 6-digit OTP,
+     *      - stores it in Redis with a 5-minute expiration,
+     *      - updates the transaction status to PENDING_VERIFICATION,
+     *      - publishes a SendOtpEvent to "transaction.otp.generated" topic to notify the user.
+     * @param payload
+     */
+    @KafkaListener(topics = Topic.VERIFICATION_REQUIRED, groupId = "verification-required-group")
     public void handleVerificationRequiredEvent(@Payload VerificationRequiredEvent payload) {
         log.info("Verification required - transaction: {} reason: {}",
                 payload.getReferenceNumber(), payload.getReason());

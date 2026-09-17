@@ -30,29 +30,37 @@ import java.util.Map;
 @Slf4j
 public class KafkaConfig {
 
+    // This is to give the kafka bootstrap server port
     @Value("${spring.kafka.bootstrap-servers:localhodst:9092}")
     private String bootstrapServer;
 
+    // This is to give the kafka consumer group id
     @Value("${spring.kafka.consumer.group-id:account-service-group}")
     private String groupId;
 
+    // This is to give the kafka producer acks config
     @Value("${spring.kafka.producer.properties.acks:all}")
     private String acks;
 
+    // This is to give the kafka producer delivery timeout config
     @Value("${spring.kafka.producer.properties.delivery.timeout.ms:120000}")
     private String deliveryTimeoutMs;
 
+    // This is to give the kafka producer linger config
     @Value("${spring.kafka.producer.properties.linger.ms:0}")
     private String lingerMs;
 
+    // This is to give the kafka producer request timeout config
     @Value("${spring.kafka.producer.properties.request.timeout.ms:30000}")
     private String requestTimeoutMs;
 
+    // This is to give the kafka producer transaction id prefix config
     @Value("${spring.kafka.producer.transaction-id-prefix}")
     private String transactionIdPrefix;
 
+    // This is to give the kafka consumer isolation level config
     @Value("${spring.kafka.consumer.isolation-level:READ_COMMITTED}")
-    String isolationLevel;
+    private String isolationLevel;
 
     @Bean
     public ProducerFactory<String, Object> producerFactory() {

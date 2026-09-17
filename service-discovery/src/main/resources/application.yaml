@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: service-discovery
+eureka:
+  client:
+    register-with-eureka: fasle
+    fetch-registry: false
+  server:
+    enable-self-preservation: false # Disables the self-preservation mode of the Eureka server, allowing it to evict instances that are not sending heartbeats.
+    eviction-interval-timer-in-ms: 5000 # The interval at which the Eureka server checks for expired instances and evicts them from the registry.
+
+server:
+  port: 8761
