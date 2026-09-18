@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class JWTService {
 
@@ -124,8 +123,7 @@ public class JWTService {
 
 	Instant expiration =
 			now.plusSeconds(
-					jwtProperties
-							.getAccessTokenExpirationSeconds()
+					300
 			);
 
 	public String generateAccessToken(Authentication authentication, Long userId) {
@@ -158,7 +156,7 @@ public class JWTService {
 				.claim("authorities", roles)
 				.claim("userId", userId)
 				.issuedAt(new Date())
-				.expiration(Date.from(expiration)) // 15 minute
+				.expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 15)) // 15 minutes
 				.signWith(privateKey, Jwts.SIG.RS256)
 				.compact();
 	}

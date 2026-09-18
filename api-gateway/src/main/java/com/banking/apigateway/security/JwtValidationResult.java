@@ -5,8 +5,8 @@ import java.util.Set;
 public record JwtValidationResult(
 		boolean valid,
 		String userId,
-		String username,
-		String role,
+		String userEmail,
+//		String role,
 		Set<String> authorities
 ) {
 
@@ -15,7 +15,7 @@ public record JwtValidationResult(
 				false,
 				null,
 				null,
-				null,
+//				null,
 				Set.of()
 		);
 	}
@@ -23,14 +23,14 @@ public record JwtValidationResult(
 	public static JwtValidationResult valid(
 			String userId,
 			String username,
-			String role,
+//			String role,
 			Set<String> authorities) {
 
 		return new JwtValidationResult(
 				true,
 				userId,
 				username,
-				role,
+//				role,
 				authorities
 		);
 	}

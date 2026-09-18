@@ -2,6 +2,7 @@ package com.banking.apigateway.security;
 
 import com.banking.apigateway.config.JwtProperties;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -41,20 +42,25 @@ public class JwtService {
 	public JwtValidationResult validateToken(String token) {
 
 		try {
-			Claims claims = Jwts.parser()
+			Jws<Claims> claimsJws = Jwts.parser()
 					.verifyWith(publicKey)
 					.requireIssuer(jwtProperties.getIssuer())
 					.requireAudience(jwtProperties.getAudience())
 					.clockSkewSeconds(jwtProperties.getClockSkewSeconds())
 					.build()
-					.parseSignedClaims(token)
-					.getPayload();
+					.parseSignedClaims(token);
+//					.getPayload();
 
-			String userId = claims.getSubject();
+			System.out.println(claimsJws);
+
+			Claims claims = claimsJws.getPayload();
+
+			String userId = claims.getSubject(); // or claims.get("userId", String.class);
+			System.out.println(userId);
 			String username =
-					claims.get("username", String.class);
+					claims.get("email", String.class);
 			String role =
-					claims.get("role", String.class);
+					claims.get("authorities", String.class);
 			Set<String> authorities =
 					extractAuthorities(claims);
 
@@ -65,13 +71,16 @@ public class JwtService {
 			return JwtValidationResult.valid(
 					userId,
 					username,
-					role,
+//					role,
 					authorities
 			);
 
 		} catch (JwtException |
 		         IllegalArgumentException exception) {
-
+			System.out.println("JWT validation failed");
+			System.out.println("Exception: " + exception.getClass().getName());
+			System.out.println("Message: " + exception.getMessage());
+			exception.printStackTrace();
 			return JwtValidationResult.invalid();
 		}
 	}

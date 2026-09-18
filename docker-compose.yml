@@ -20,6 +20,37 @@ services:
 
 
   # =========================================================
+  # POSTGRESQL - AUTH SERVICE
+  # =========================================================
+  postgres-auth:
+    image: postgres:18
+    container_name: postgres-auth
+
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    command:
+      - postgres
+      - -c
+      - wal_level=logical
+      - -c
+      - max_wal_senders=10
+      - -c
+      - max_replication_slots=10
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres-auth-data:/var/lib/postgresql
+
+    networks:
+      - banking-network
+
+
+  # =========================================================
   # POSTGRESQL - TRANSACTION SERVICE
   # =========================================================
   postgres-transaction:
@@ -41,7 +72,7 @@ services:
       - max_replication_slots=10
 
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
     volumes:
       - postgres-transaction-data:/var/lib/postgresql
@@ -213,6 +244,8 @@ volumes:
   postgres-transaction-data:
 
   redis-data:
+
+  postgres-auth-data:
 
 
 # ===========================================================

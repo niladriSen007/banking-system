@@ -47,7 +47,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         default_schema: banking
   datasource:
-    url: jdbc:postgresql://localhost:5432/payment_db
+    url: jdbc:postgresql://localhost:5435/payment_db
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -55,8 +55,6 @@ spring:
 razorpay:
   key-id: rzp_test_TbAOkeQuHOKPt3
   key-secret: JDymbzVzONlrkzF4FHn56RLk
-server:
-  port: 5002
 account:
   service:
     url: http://localhost:5001
@@ -66,6 +64,9 @@ management:
       exposure:
         include:
           - health, info
+server:
+  port: 5005
+
 eureka:
   client:
     service-url:
@@ -73,6 +74,9 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
   instance:
+    hostname: localhost
+    prefer-ip-address: false
+    instance-id: ${spring.application.name}:${server.port}
     lease-renewal-interval-in-seconds: 10 # The interval at which the Eureka client sends heartbeats to the Eureka server to renew its lease.
     lease-expiration-duration-in-seconds: 30 # The duration after which the Eureka server considers the instance as expired if it doesn't receive a heartbeat.
 

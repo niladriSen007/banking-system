@@ -47,11 +47,14 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         default_schema: banking
   datasource:
-    url: jdbc:postgresql://localhost:5432/account_db
+    url: jdbc:postgresql://localhost:5434/account_db
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
 
+
+server:
+  port: 5001
 
 eureka:
   client:
@@ -60,10 +63,11 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
   instance:
+    hostname: localhost
+    prefer-ip-address: false
+    instance-id: ${spring.application.name}:${server.port}
     lease-renewal-interval-in-seconds: 10 # The interval at which the Eureka client sends heartbeats to the Eureka server to renew its lease.
     lease-expiration-duration-in-seconds: 30 # The duration after which the Eureka server considers the instance as expired if it doesn't receive a heartbeat.
-server:
-  port: 5001
 
 management:
   endpoints:

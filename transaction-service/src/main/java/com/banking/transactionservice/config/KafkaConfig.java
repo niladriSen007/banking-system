@@ -98,8 +98,8 @@ public class KafkaConfig {
 
         DefaultErrorHandler errorHandler = new DefaultErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate),
                 new FixedBackOff(5000, 5)); // Retry every 5 seconds, up to 5 times
-        errorHandler.addNotRetryableExceptions(NonRetryableException.class, NullPointerException.class, HttpServerErrorException.class);
-        errorHandler.addRetryableExceptions(RetryableException.class);
+//        errorHandler.addNotRetryableExceptions(NonRetryableException.class, NullPointerException.class, HttpServerErrorException.class);
+//        errorHandler.addRetryableExceptions(RetryableException.class);
 
         ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);

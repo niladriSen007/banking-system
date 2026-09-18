@@ -139,7 +139,7 @@ public class TransactionService implements ITransactionService {
 	public List<TransactionResponse> getTransactionHistory(Long accountNumber) {
 		log.info("Get transaction history from account {}", accountNumber);
 		return transactionRepository
-				.findBySenderAccountNumberOrderByCreatedAtDesc(accountNumber)
+				.findBySenderAccountNumberOrderByInitiatedAtDesc(accountNumber)
 				.stream()
 				.map(Mapper::toTransactionResponse)
 				.toList();

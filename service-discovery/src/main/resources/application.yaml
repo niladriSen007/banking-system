@@ -1,9 +1,10 @@
 spring:
   application:
     name: service-discovery
+
 eureka:
   client:
-    register-with-eureka: fasle
+    register-with-eureka: false
     fetch-registry: false
   server:
     enable-self-preservation: false # Disables the self-preservation mode of the Eureka server, allowing it to evict instances that are not sending heartbeats.

@@ -1,6 +1,7 @@
 package com.banking.authservice.exceptions;
 
 
+import com.banking.authservice.dto.response.ApiResponse;
 import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

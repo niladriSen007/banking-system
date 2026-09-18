@@ -25,12 +25,14 @@ public class JwtAuthenticationGlobalFilter implements GlobalFilter, Ordered {
 
 	private final JwtService jwtService;
 	private final JwtProperties jwtProperties;
-	private final AntPathMatcher pathMatcher;
+	private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
 		String path = exchange.getRequest().getPath().value();
+
+		System.out.println(path);
 
 		/*
 		 * 1. Public endpoint?
@@ -113,21 +115,21 @@ public class JwtAuthenticationGlobalFilter implements GlobalFilter, Ordered {
 									result.userId()
 							);
 
-							if (result.username() != null) {
+							if (result.userEmail() != null) {
 
 								headers.add(
-										"X-Username",
-										result.username()
+										"X-UserEmail",
+										result.userEmail()
 								);
 							}
 
-							if (result.role() != null) {
-
-								headers.add(
-										"X-Role",
-										result.role()
-								);
-							}
+//							if (result.role() != null) {
+//
+//								headers.add(
+//										"X-Role",
+//										result.role()
+//								);
+//							}
 
 							if (!result.authorities().isEmpty()) {
 								headers.add(
