@@ -9,5 +9,5 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface TransactionServiceClient {
 
     @GetMapping("/api/v1/transaction/count")
-    ApiResponse<Long> getTransactionCount(@RequestParam(name = "accountNumber") Long accountNumber);
+    ApiResponse<Long> getTransactionCount(@RequestParam(name = "accountNumber") String accountNumber);
 }

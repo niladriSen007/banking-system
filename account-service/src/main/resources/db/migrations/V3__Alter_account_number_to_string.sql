@@ -1,0 +1,1 @@
+ALTER TABLE banking.accounts ALTER COLUMN account_number TYPE VARCHAR(255);

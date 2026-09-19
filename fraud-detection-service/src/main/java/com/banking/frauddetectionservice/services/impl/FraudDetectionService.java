@@ -25,14 +25,14 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE)
+//@FieldDefaults(level = AccessLevel.PRIVATE)
 public class FraudDetectionService implements IFraudDetectionService {
 
     private final CleanTransactionProducer cleanTransactionProducer;
-    AccountServiceClient accountServiceClient;
-    TransactionServiceClient transactionServiceClient;
-    VerificationRequiredProducer verificationRequiredProducer;
-    RedisTemplate<String, String> redisTemplate;
+    private final AccountServiceClient accountServiceClient;
+    private final TransactionServiceClient transactionServiceClient;
+    private final VerificationRequiredProducer verificationRequiredProducer;
+    private final RedisTemplate<String, String> redisTemplate;
     static int MAX_TRANSACTIONS_PER_MINUTE = 6;
     static int SUSPICIOUS_AMOUNT_MULTIPLIER = 3;
     static float MAX_BALANCE_PERCENTAGE = 0.9f;
@@ -40,7 +40,7 @@ public class FraudDetectionService implements IFraudDetectionService {
     @Override
     public void checkTransactionFraud(TransactionInitiatedEvent transactionInitiatedEvent) {
         String transactionReferenceNumber = transactionInitiatedEvent.getReferenceNumber();
-        Long senderAccountNumber = transactionInitiatedEvent.getSenderAccountNumber();
+        String senderAccountNumber = transactionInitiatedEvent.getSenderAccountNumber();
         BigDecimal amountToBeTransferred = transactionInitiatedEvent.getAmount();
 
         ApiResponse<BigDecimal> accountBalancerResponse = accountServiceClient.getAccountBalance(senderAccountNumber);
@@ -65,6 +65,8 @@ public class FraudDetectionService implements IFraudDetectionService {
                     transactionReferenceNumber,
                     verificationRequireEvent
             );
+
+            System.out.println("Verification required for transaction: " + transactionReferenceNumber+" published to topic: "+Topics.VERIFICATION_REQUIRED_TOPIC);
         } else {
             // No fraud so happy path
             CleanTransactionEvent cleanTransactionEvent = CleanTransactionEvent.builder()
@@ -85,7 +87,7 @@ public class FraudDetectionService implements IFraudDetectionService {
 
     }
 
-    private FraudResponse performFraudChecks(Long senderAccountNumber, BigDecimal senderAccountBalance, BigDecimal amountToBeTransferred) {
+    private FraudResponse performFraudChecks(String senderAccountNumber, BigDecimal senderAccountBalance, BigDecimal amountToBeTransferred) {
         if (isVelocityExceeded(senderAccountNumber)) {
             return new FraudResponse(true, "Too many transactions have been verified within a minute");
         }
@@ -108,7 +110,7 @@ public class FraudDetectionService implements IFraudDetectionService {
         return amountToBeTransferred.compareTo(maxAllowed) > 0;
     }
 
-    private boolean isAmountSuspicious(Long senderAccountNumber, BigDecimal amountToBeTransferred) {
+    private boolean isAmountSuspicious(String senderAccountNumber, BigDecimal amountToBeTransferred) {
         String averageKey = "fraud:average_amount:" + senderAccountNumber;
         String oldAverageAmount = redisTemplate.opsForValue().get(averageKey);
         if (oldAverageAmount == null) {
@@ -134,7 +136,7 @@ public class FraudDetectionService implements IFraudDetectionService {
         return isSuspicious;
     }
 
-    private boolean isVelocityExceeded(Long senderAccountNumber) {
+    private boolean isVelocityExceeded(String senderAccountNumber) {
         String key = "fraud:velocity:" + senderAccountNumber;
         Long count = redisTemplate.opsForValue().increment(key);
         if (count != null && count == 1) {

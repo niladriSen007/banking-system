@@ -9,11 +9,11 @@ import java.time.LocalDateTime;
 public record AccountResponse(
         Long id,
         String accountHolderName,
-        Long accountNumber,
+        String accountNumber,
         String email,
         String phoneNumber,
         AccountType accountType,
-        AccountStatus accountStaus,
+        AccountStatus accountStatus,
         BigDecimal balance,
         BigDecimal dailyTransactionLimit,
         LocalDateTime createdAt

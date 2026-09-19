@@ -1,4 +1,4 @@
-package com.banking.transactionservice.event;
+package com.banking.accountservice.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,9 +12,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TransactionCompletedEvent {
-    private String referenceNumber;
-    private String senderAccountNumber;
-    private BigDecimal amount;
-    private String receiverAccountNumber;
-    private String description;
+	private String referenceNumber;
+	private String senderAccountNumber;
+	private BigDecimal amount;
+	private String receiverAccountNumber;
+	private String description;
 }

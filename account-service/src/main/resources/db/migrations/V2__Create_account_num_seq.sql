@@ -1,0 +1,3 @@
+CREATE SEQUENCE account_number_seq
+    START WITH 0000000001
+    INCREMENT BY 1;

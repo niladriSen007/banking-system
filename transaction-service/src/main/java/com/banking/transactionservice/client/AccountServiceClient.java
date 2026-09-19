@@ -14,14 +14,14 @@ import java.math.BigDecimal;
 public interface AccountServiceClient {
 
     @PatchMapping("/api/v1/accounts/{accountNumber}/debit")
-    ApiResponse<BigDecimal> debitBalance(
-            @PathVariable(name = "accountNumber") Long accountNumber,
+    ApiResponse<BigDecimal> deductBalance(
+            @PathVariable(name = "accountNumber") String accountNumber,
             @RequestBody @Valid BigDecimal amount
     );
 
-    @PatchMapping("/api/v1/{accountNumber}/credit")
+    @PatchMapping("/api/v1/accounts/{accountNumber}/credit")
     ApiResponse<BigDecimal> creditBalance(
-            @PathVariable(name = "accountNumber") Long accountNumber,
+            @PathVariable(name = "accountNumber") String accountNumber,
             @RequestBody @Valid BigDecimal amount
     );
 }

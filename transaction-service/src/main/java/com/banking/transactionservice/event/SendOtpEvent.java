@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class SendOtpEvent {
     private String referenceNumber;
-    private Long senderAccountNumber;
+    private String senderAccountNumber;
     private BigDecimal amount;
     private String reason;
     private String otp;

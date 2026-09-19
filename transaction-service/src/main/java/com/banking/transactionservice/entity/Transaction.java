@@ -20,10 +20,10 @@ public class Transaction {
     private Long id;
 
     @Column(nullable = false)
-    private Long senderAccountNumber;
+    private String senderAccountNumber;
 
     @Column(nullable = false)
-    private Long receiverAccountNumber;
+    private String receiverAccountNumber;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

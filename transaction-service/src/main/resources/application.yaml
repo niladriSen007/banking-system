@@ -1,8 +1,13 @@
 spring:
   application:
     name: transaction-service
-#  config:
-#    import: optional:configserver:http://localhost:8888
+  cloud:
+    openfeign:
+      httpclient:
+        hc5:
+          enabled: true
+  #  config:
+  #    import: optional:configserver:http://localhost:8888
   profiles:
     active: dev
   kafka:
@@ -13,11 +18,11 @@ spring:
         delivery.timeout.ms: 120000 # 2 minutes timeout for each request
         linger.ms: 0 # 0 ms delay between messages
         request.timeout.ms: 30000 # 30 seconds timeout for each request
-      transaction-id-prefix: account-service-${random.value}-
+#      transaction-id-prefix: account-service-${random.value}-
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
     consumer:
-      group-id: account-service-group
+      group-id: verification-required-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer

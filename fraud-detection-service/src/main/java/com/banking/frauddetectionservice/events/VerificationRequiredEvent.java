@@ -13,9 +13,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class VerificationRequiredEvent {
     private String referenceNumber;
-    private Long senderAccountNumber;
+    private String senderAccountNumber;
     private BigDecimal amount;
     private String reason;
-    private boolean isFraud;
+    private Boolean isFraud;
 }
 

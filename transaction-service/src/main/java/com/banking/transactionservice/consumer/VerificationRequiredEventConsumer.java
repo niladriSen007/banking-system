@@ -60,7 +60,7 @@ public class VerificationRequiredEventConsumer {
         String otp = String.format("%06d", (int) (Math.random() * 900000) + 100000);
 
         // Store OTP in Redis - expires in 5 minutes
-        String otpKey = "verification:otp" + payload.getReferenceNumber();
+        String otpKey = "verification:otp-" + payload.getReferenceNumber();
         redisTemplate.opsForValue().set(otpKey, otp, OTP_EXPIRY_MINUTES, TimeUnit.MINUTES);
 
         // Update Status

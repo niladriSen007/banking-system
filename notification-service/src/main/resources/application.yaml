@@ -1,6 +1,33 @@
 spring:
   application:
     name: notification-service
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      acks: all
+      properties:
+        delivery.timeout.ms: 120000 # 2 minutes timeout for each request
+        linger.ms: 0 # 0 ms delay between messages
+        request.timeout.ms: 30000 # 30 seconds timeout for each request
+      #      transaction-id-prefix: account-service-${random.value}-
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+    consumer:
+      group-id: notification-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: "*"
+            use:
+              type:
+                headers: false
+            value:
+              default:
+                type: java.util.HashMap
 
 server:
   port: 5004

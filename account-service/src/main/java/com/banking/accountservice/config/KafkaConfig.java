@@ -89,7 +89,23 @@ public class KafkaConfig {
         consumerProps.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JacksonJsonDeserializer.class);
         consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        consumerProps.put(JacksonJsonDeserializer.TRUSTED_PACKAGES, "*");
+//        consumerProps.put(JacksonJsonDeserializer.TRUSTED_PACKAGES, "*");
+        consumerProps.put(
+                JacksonJsonDeserializer.TRUSTED_PACKAGES,
+                "com.banking.accountservice.event"
+        );
+
+        // IMPORTANT
+        consumerProps.put(
+                JacksonJsonDeserializer.VALUE_DEFAULT_TYPE,
+                "com.banking.accountservice.event.TransactionCompletedEvent"
+        );
+
+        // IMPORTANT
+        consumerProps.put(
+                JacksonJsonDeserializer.USE_TYPE_INFO_HEADERS,
+                false
+        );
         consumerProps.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, isolationLevel.toLowerCase());
         log.info("Kafka Consumer Configured with bootstrap server: {}", bootstrapServer);
         return new DefaultKafkaConsumerFactory<>(consumerProps);

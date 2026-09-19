@@ -20,28 +20,29 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+//@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 @Transactional
 public class AccountService implements IAccountService {
 
     //TODO: Implement Bloom Filter
 
-    AccountRepository accountRepository;
+    private final AccountRepository accountRepository;
 
     @Override
     public AccountResponse createAccount(AccountRequest accountRequest) {
         log.info("Creating account - Service");
 
         boolean isAccountExistsByEmail = accountRepository.existsByEmail(accountRequest.getEmail());
-        if (!isAccountExistsByEmail) {
+        if (isAccountExistsByEmail) {
             throw new AccountAlreadyExistsException("Account with email " + accountRequest.getEmail() + " already exists");
         }
 
-        Account accountDetails = Mapper.toAccount(accountRequest, generateAccountNumber());
+        Account accountDetails = Mapper.toAccount(accountRequest, UUID.randomUUID().toString());
         Account newAccount = accountRepository.save(accountDetails);
 
         return Mapper.toAccountResponse(newAccount);
@@ -53,14 +54,14 @@ public class AccountService implements IAccountService {
 
     @Override
     @Transactional(readOnly = true)
-    public AccountResponse getAccountDetails(Long accountNumber) {
+    public AccountResponse getAccountDetails(String accountNumber) {
         return accountRepository.findByAccountNumber(accountNumber).
                 map(Mapper::toAccountResponse).
                 orElseThrow(() -> new AccountDoesNotExistException("Account not found with given account number"));
     }
 
     @Override
-    public AccountResponse updateAccountDetails(Long accountNumber, UpdateAccountRequest updateAccountRequest) {
+    public AccountResponse updateAccountDetails(String accountNumber, UpdateAccountRequest updateAccountRequest) {
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new AccountDoesNotExistException("Account not found with given account number"));
 
@@ -74,7 +75,7 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public Void deleteAccount(Long accountNumber) {
+    public Void deleteAccount(String accountNumber) {
         int affectedRows = accountRepository.markAccountAsClosed(accountNumber);
         if (affectedRows == 0) {
             throw new AccountDoesNotExistException("Account not found with given account number");
@@ -85,14 +86,14 @@ public class AccountService implements IAccountService {
 
     @Override
     @Transactional(readOnly = true)
-    public BigDecimal getAccountBalance(Long accountNumber) {
+    public BigDecimal getAccountBalance(String accountNumber) {
         return accountRepository.findByAccountNumber(accountNumber)
                 .map(Account::getBalance)
                 .orElseThrow(() -> new AccountDoesNotExistException("Account not found with given account number"));
     }
 
     @Override
-    public Boolean blockAccount(Long accountNumber) {
+    public Boolean blockAccount(String accountNumber) {
         int affectedRows = accountRepository.markAccountAsBlocked(accountNumber);
         if (affectedRows == 0) {
             throw new AccountDoesNotExistException("Account not found with given account number");
@@ -102,10 +103,10 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public BigDecimal deductBalance(Long accountNumber, BigDecimal amount) {
+    public BigDecimal deductBalance(String accountNumber, BigDecimal amount) {
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new AccountDoesNotExistException("Account not found with given account number"));
-        if (!account.getAccountStaus().equals(AccountStatus.ACTIVE)) {
+        if (!account.getAccountStatus().equals(AccountStatus.ACTIVE)) {
             throw new AccountNotActiveForTransactionsException("Account not active for this account");
         }
         if (account.getBalance().compareTo(amount) < 0) {
@@ -117,10 +118,10 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public BigDecimal creditBalnce(Long accountNumber, BigDecimal amount) {
+    public BigDecimal creditBalnce(String accountNumber, BigDecimal amount) {
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new AccountDoesNotExistException("Account not found with given account number"));
-        if (!account.getAccountStaus().equals(AccountStatus.ACTIVE)) {
+        if (!account.getAccountStatus().equals(AccountStatus.ACTIVE)) {
             throw new AccountNotActiveForTransactionsException("Account not active for this account");
         }
         account.setBalance(account.getBalance().add(amount));

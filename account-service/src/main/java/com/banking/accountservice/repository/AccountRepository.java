@@ -20,22 +20,22 @@ public interface AccountRepository extends JpaRepository<Account,Long> {
             nativeQuery = true)
     Long getNextAccountNumber();
 
-    Optional<Account> findByAccountNumber(Long accountNumber);
+    Optional<Account> findByAccountNumber(String accountNumber);
 
-//    void deleteByAccountNumber(Long accountNumber);
-
-    @Transactional
-    @Modifying
-    @Query("""  
-                UPDATE Account a SET a.accountStaus = "CLOSED"
-            """)
-    int markAccountAsClosed(Long accountNumber);
-
+//    void deleteByAccountNumber(String accountNumber);
 
     @Transactional
     @Modifying
     @Query("""  
-                UPDATE Account a SET a.accountStaus = "BLOCKED"
+                UPDATE Account a SET a.accountStatus = "CLOSED"
             """)
-    int markAccountAsBlocked(Long accountNumber);
+    int markAccountAsClosed(String accountNumber);
+
+
+    @Transactional
+    @Modifying
+    @Query("""  
+                UPDATE Account a SET a.accountStatus = "BLOCKED"
+            """)
+    int markAccountAsBlocked(String accountNumber);
 }

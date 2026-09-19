@@ -27,10 +27,10 @@ import java.util.Map;
 @Slf4j
 public class KafkaConfig {
 
-    @Value("${spring.kafka.bootstrap-servers:localhodst:9092}")
+    @Value("${spring.kafka.bootstrap-servers:localhost:9092}")
     private String bootstrapServer;
 
-    @Value("${spring.kafka.consumer.group-id:fraud-detection-group}")
+    @Value("${spring.kafka.consumer.group-id:verification-required-group}")
     private String groupId;
 
     @Value("${spring.kafka.producer.properties.acks:all}")
@@ -45,8 +45,8 @@ public class KafkaConfig {
     @Value("${spring.kafka.producer.properties.request.timeout.ms:30000}")
     private String requestTimeoutMs;
 
-    @Value("${spring.kafka.producer.transaction-id-prefix}")
-    private String transactionIdPrefix;
+//    @Value("${spring.kafka.producer.transaction-id-prefix}")
+//    private String transactionIdPrefix;
 
     @Value("${spring.kafka.consumer.isolation-level:READ_COMMITTED}")
     String isolationLevel;
@@ -63,8 +63,8 @@ public class KafkaConfig {
         producerProps.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, requestTimeoutMs);
         producerProps.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
         producerProps.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 5);
-        producerProps.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, transactionIdPrefix);
-        // producerProps.put(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE);
+//        producerProps.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, transactionIdPrefix);
+        producerProps.put(ProducerConfig.RETRIES_CONFIG, 2);
         log.info("Kafka Producer Configured with bootstrap server: {}", bootstrapServer);
         return new DefaultKafkaProducerFactory<>(producerProps);
     }
@@ -78,7 +78,23 @@ public class KafkaConfig {
         consumerProps.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JacksonJsonDeserializer.class);
         consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        consumerProps.put(JacksonJsonDeserializer.TRUSTED_PACKAGES, "*");
+//        consumerProps.put(JacksonJsonDeserializer.TRUSTED_PACKAGES, "*");
+        consumerProps.put(
+                JacksonJsonDeserializer.TRUSTED_PACKAGES,
+                "com.banking.transactionservice.event"
+        );
+
+        // IMPORTANT
+        consumerProps.put(
+                JacksonJsonDeserializer.VALUE_DEFAULT_TYPE,
+                "com.banking.transactionservice.event.VerificationRequiredEvent"
+        );
+
+        // IMPORTANT
+        consumerProps.put(
+                JacksonJsonDeserializer.USE_TYPE_INFO_HEADERS,
+                false
+        );
         consumerProps.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, isolationLevel.toLowerCase());
         log.info("Kafka Consumer Configured with bootstrap server: {}", bootstrapServer);
         return new DefaultKafkaConsumerFactory<>(consumerProps);

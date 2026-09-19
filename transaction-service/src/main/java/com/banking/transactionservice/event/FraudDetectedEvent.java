@@ -13,6 +13,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class FraudDetectedEvent {
     private String referenceNumber;
-    private Long senderAccountNumber;
+    private String senderAccountNumber;
     private String reason;
 }

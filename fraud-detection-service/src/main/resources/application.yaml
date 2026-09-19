@@ -2,8 +2,46 @@ spring:
   application:
     name: fraud-detection-service
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      acks: all
+      properties:
+        delivery.timeout.ms: 120000 # 2 minutes timeout for each request
+        linger.ms: 0 # 0 ms delay between messages
+        request.timeout.ms: 30000 # 30 seconds timeout for each request
+#      transaction-id-prefix: fraud-detection-service-${random.value}-
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+    consumer:
+      group-id: fraud-detection-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: "*"
+            use:
+              type:
+                headers: false
+            value:
+              default:
+                type: java.util.HashMap
+
+
 server:
   port: 5003
+
+account:
+  service:
+    url: http://localhost:5001
+transaction:
+  service:
+    url: http://localhost:5006
+
+
 
 eureka:
   client:

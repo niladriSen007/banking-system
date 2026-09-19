@@ -33,7 +33,7 @@ public class AccountController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<AccountResponse>> getAccount(@RequestParam(name = "accountNumber") @Valid Long accountNumber) {
+    public ResponseEntity<ApiResponse<AccountResponse>> getAccount(@RequestParam(name = "accountNumber") @Valid String accountNumber) {
         return ResponseEntity.ok(
                 ApiResponse.success(
                         accountService.getAccountDetails(accountNumber),
@@ -44,7 +44,7 @@ public class AccountController {
 
     @PatchMapping("/{accountNumber}")
     public ResponseEntity<ApiResponse<AccountResponse>> updateAccount(@RequestBody @Valid UpdateAccountRequest updateAccountRequest,
-                                                                      @PathVariable(name = "accountNumber") Long accountNumber
+                                                                      @PathVariable(name = "accountNumber") String accountNumber
     ) {
         return ResponseEntity.ok(
                 ApiResponse.success(
@@ -55,7 +55,7 @@ public class AccountController {
     }
 
     @DeleteMapping("/{accountNumber}")
-    public ResponseEntity<ApiResponse<Void>> deleteAccount(@RequestParam(name = "accountNumber") Long accountNumber) {
+    public ResponseEntity<ApiResponse<Void>> deleteAccount(@RequestParam(name = "accountNumber") String accountNumber) {
         return ResponseEntity.ok(
                 ApiResponse.success(
                         accountService.deleteAccount(accountNumber),
@@ -65,7 +65,7 @@ public class AccountController {
     }
 
     @GetMapping("/{accountNumber}/balance")
-    public ResponseEntity<ApiResponse<BigDecimal>> getAccountBalance(@PathVariable(name = "accountNumber") Long accountNumber) {
+    public ResponseEntity<ApiResponse<BigDecimal>> getAccountBalance(@PathVariable(name = "accountNumber") String accountNumber) {
         return ResponseEntity.ok(
                 ApiResponse.success(
                         accountService.getAccountBalance(accountNumber),
@@ -75,7 +75,7 @@ public class AccountController {
     }
 
     @PatchMapping("/{accountNumber}/block-account")
-    public ResponseEntity<ApiResponse<Boolean>> blockAccount(@PathVariable(name = "accountNumber") Long accountNumber) {
+    public ResponseEntity<ApiResponse<Boolean>> blockAccount(@PathVariable(name = "accountNumber") String accountNumber) {
         return ResponseEntity.ok(
                 ApiResponse.success(
                         accountService.blockAccount(accountNumber),
@@ -92,7 +92,7 @@ public class AccountController {
      */
     @PatchMapping("/{accountNumber}/debit")
     public ResponseEntity<ApiResponse<BigDecimal>> deductBalance(
-            @PathVariable(name = "accountNumber") Long accountNumber,
+            @PathVariable(name = "accountNumber") String accountNumber,
             @RequestBody @Valid BigDecimal amount
     ) {
         return ResponseEntity.ok(
@@ -110,7 +110,7 @@ public class AccountController {
      */
     @PatchMapping("/{accountNumber}/credit")
     public ResponseEntity<ApiResponse<BigDecimal>> creditBalance(
-            @PathVariable(name = "accountNumber") Long accountNumber,
+            @PathVariable(name = "accountNumber") String accountNumber,
             @RequestBody @Valid BigDecimal amount
     ) {
         return ResponseEntity.ok(

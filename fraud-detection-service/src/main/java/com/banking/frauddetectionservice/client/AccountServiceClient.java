@@ -12,5 +12,5 @@ import java.math.BigDecimal;
 public interface AccountServiceClient {
 
     @GetMapping("/api/v1/accounts/{accountNumber}/balance")
-    ApiResponse<BigDecimal> getAccountBalance(@PathVariable(name = "accountNumber") Long accountNumber);
+    ApiResponse<BigDecimal> getAccountBalance(@PathVariable(name = "accountNumber") String accountNumber);
 }

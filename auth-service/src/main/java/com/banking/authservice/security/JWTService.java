@@ -156,7 +156,7 @@ public class JWTService {
 				.claim("authorities", roles)
 				.claim("userId", userId)
 				.issuedAt(new Date())
-				.expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 15)) // 15 minutes
+				.expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60)) // 1 hour
 				.signWith(privateKey, Jwts.SIG.RS256)
 				.compact();
 	}

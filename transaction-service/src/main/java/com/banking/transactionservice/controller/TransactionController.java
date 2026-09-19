@@ -61,7 +61,7 @@ public class TransactionController {
 
     @GetMapping("/account/{accountNumber}")
     public ResponseEntity<ApiResponse<List<TransactionResponse>>> getTransactionHistory(
-            @PathVariable(name = "accountNumber") Long accountNumber
+            @PathVariable(name = "accountNumber") String accountNumber
     ) {
         log.info("getTransactionHistory - Controller");
         return ResponseEntity.ok(
@@ -88,7 +88,7 @@ public class TransactionController {
 
     @GetMapping("/count")
     public ResponseEntity<ApiResponse<Long>> getTransactionCount(
-            @RequestParam(name = "accountNumber") @Valid Long accountNumber
+            @RequestParam(name = "accountNumber") @Valid String accountNumber
     ) {
         log.info("getTransactionCount - Controller");
         return ResponseEntity.ok(

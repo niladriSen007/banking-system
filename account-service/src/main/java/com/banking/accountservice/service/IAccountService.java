@@ -10,17 +10,17 @@ import java.math.BigDecimal;
 public interface IAccountService {
     AccountResponse createAccount(@Valid AccountRequest accountRequest);
 
-    AccountResponse getAccountDetails(@Valid Long accountNumber);
+    AccountResponse getAccountDetails(@Valid String accountNumber);
 
-    AccountResponse updateAccountDetails(Long accountNumber, @Valid UpdateAccountRequest updateAccountRequest);
+    AccountResponse updateAccountDetails(String accountNumber, @Valid UpdateAccountRequest updateAccountRequest);
 
-    Void deleteAccount(Long accountNumber);
+    Void deleteAccount(String accountNumber);
 
-    BigDecimal getAccountBalance(Long accountNumber);
+    BigDecimal getAccountBalance(String accountNumber);
 
-    Boolean blockAccount(Long accountNumber);
+    Boolean blockAccount(String accountNumber);
 
-    BigDecimal deductBalance(Long accountNumber, BigDecimal amount);
+    BigDecimal deductBalance(String accountNumber, BigDecimal amount);
 
-    BigDecimal creditBalnce(Long accountNumber, BigDecimal amount);
+    BigDecimal creditBalnce(String accountNumber, BigDecimal amount);
 }

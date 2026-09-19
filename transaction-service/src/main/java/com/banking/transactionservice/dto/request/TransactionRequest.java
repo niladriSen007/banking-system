@@ -15,17 +15,17 @@ import java.math.BigDecimal;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TransactionRequest {
 
-    @NotBlank(message = "Sender account number must not be blank")
-    Long senderAccountNumber;
+	@NotNull(message = "Sender account number must not be blank")
+	String senderAccountNumber;
 
-    @NotBlank(message = "Receiver account number must not be blank")
-    Long receiverAccountNumber;
+	@NotNull(message = "Receiver account number must not be blank")
+	String receiverAccountNumber;
 
-    @NotNull(message = "Amount is required")
-    @Positive(message = "Amount must be positive")
-    BigDecimal amount;
+	@NotNull(message = "Amount is required")
+	@Positive(message = "Amount must be positive")
+	BigDecimal amount;
 
-    private String description;
+	private String description;
 }
 
 

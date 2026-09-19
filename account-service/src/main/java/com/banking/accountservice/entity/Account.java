@@ -24,7 +24,7 @@ public class Account {
     private String accountHolderName;
 
     @Column(nullable = false,unique = true)
-    private Long accountNumber;
+    private String accountNumber;
 
     @Column(nullable = false,unique = true)
     private String email;
@@ -38,7 +38,7 @@ public class Account {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private AccountStatus accountStaus;
+    private AccountStatus accountStatus;
 
     @Column(nullable = false,precision = 15,scale = 2)
     private BigDecimal balance;

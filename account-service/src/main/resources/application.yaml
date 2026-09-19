@@ -2,8 +2,7 @@ spring:
   application:
     name: account-service
   kafka:
-    bootstrap-servers:
-      - localhost:9092
+    bootstrap-servers: localhost:9092
     producer:
       acks: all
       properties:
@@ -69,9 +68,9 @@ eureka:
     lease-renewal-interval-in-seconds: 10 # The interval at which the Eureka client sends heartbeats to the Eureka server to renew its lease.
     lease-expiration-duration-in-seconds: 30 # The duration after which the Eureka server considers the instance as expired if it doesn't receive a heartbeat.
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include:
-          - health, info
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include:
+#          - health, info

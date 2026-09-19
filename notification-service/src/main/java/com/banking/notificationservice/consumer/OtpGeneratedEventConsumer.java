@@ -23,7 +23,7 @@ public class OtpGeneratedEventConsumer {
 	public void handleOtpGeneratedEvent(@Payload SendOtpEvent sendOtpEvent) {
 		log.info("Received OTP event {}", sendOtpEvent);
 
-		Long senderAccountNumber = sendOtpEvent.getSenderAccountNumber();
+		String senderAccountNumber = sendOtpEvent.getSenderAccountNumber();
 		BigDecimal amount = sendOtpEvent.getAmount();
 		String otp = sendOtpEvent.getOtp();
 		String transactionReferenceNumber = sendOtpEvent.getReferenceNumber();

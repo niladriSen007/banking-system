@@ -18,21 +18,21 @@ public class Mapper {
                 accountDetails.getEmail(),
                 accountDetails.getPhoneNumber(),
                 accountDetails.getAccountType(),
-                accountDetails.getAccountStaus(),
+                accountDetails.getAccountStatus(),
                 accountDetails.getBalance(),
                 accountDetails.getDailyTransactionLimit(),
                 accountDetails.getCreatedAt()
         );
     }
 
-    public static Account toAccount(AccountRequest accountRequest, Long accountNumber) {
+    public static Account toAccount(AccountRequest accountRequest, String accountNumber) {
         return Account.builder()
                 .accountHolderName(accountRequest.getAccountHolderName())
                 .accountNumber(accountNumber)
                 .email(accountRequest.getEmail())
                 .phoneNumber(accountRequest.getPhoneNumber())
                 .accountType(accountRequest.getAccountType() != null ? accountRequest.getAccountType() : AccountType.SAVINGS)
-                .accountStaus(AccountStatus.ACTIVE)
+                .accountStatus(AccountStatus.ACTIVE)
                 .balance(accountRequest.getInitialDeposit() != null ? accountRequest.getInitialDeposit() : BigDecimal.ZERO)
                 .dailyTransactionLimit(BigDecimal.valueOf(100000))
                 .build();
@@ -49,7 +49,7 @@ public class Mapper {
             account.setPhoneNumber(request.getPhoneNumber().trim());
         }
         if (request.getAccountStatus() != null) {
-            account.setAccountStaus(request.getAccountStatus());
+            account.setAccountStatus(request.getAccountStatus());
         }
 
         return account;

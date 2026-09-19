@@ -12,6 +12,7 @@ import com.banking.transactionservice.event.AmountRefundEvent;
 import com.banking.transactionservice.event.FraudDetectedEvent;
 import com.banking.transactionservice.event.TransactionCompletedEvent;
 import com.banking.transactionservice.event.TransactionInitiatedEvent;
+import com.banking.transactionservice.exceptions.BulkheadExceededException;
 import com.banking.transactionservice.exceptions.RateLimitExceededException;
 import com.banking.transactionservice.exceptions.TransactionNotFoundException;
 import com.banking.transactionservice.mapper.Mapper;
@@ -44,18 +45,18 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE)
+//@FieldDefaults(level = AccessLevel.PRIVATE)
 public class TransactionService implements ITransactionService {
 
-	RedisTemplate<String, String> redisTemplate;
-	TransactionRepository transactionRepository;
-	AccountServiceClient accountServiceClient;
-	TransferInitiatedProducer transferInitiatedProducer;
-	AmountRefundProducer amountRefundProducer;
-	FraudDetectedProducer fraudDetectedProducer;
-	TransactionCompletedProducer transactionCompletedProducer;
-	ObjectMapper objectMapper;
-	OutboxRepository outboxEventRepository;
+	private final RedisTemplate<String, String> redisTemplate;
+	private final TransactionRepository transactionRepository;
+	private final AccountServiceClient accountServiceClient;
+	private final TransferInitiatedProducer transferInitiatedProducer;
+	private final AmountRefundProducer amountRefundProducer;
+	private final FraudDetectedProducer fraudDetectedProducer;
+	private final TransactionCompletedProducer transactionCompletedProducer;
+	private final ObjectMapper objectMapper;
+	private final OutboxRepository outboxEventRepository;
 
 	/**
 	 * SAGA Step 1 - >
@@ -69,10 +70,10 @@ public class TransactionService implements ITransactionService {
 	 * @return transactionResponse
 	 */
 	@Override
-	@RateLimiter(name = "accountServiceRateLimiter", fallbackMethod = "accountServiceRateLimiterFallback")
-	@Bulkhead(name = "accountServiceBulkhead", type = Bulkhead.Type.SEMAPHORE, fallbackMethod = "accountServiceRateLimiterFallback")
-	@Retry(name = "accountServiceRetry", fallbackMethod = "accountServiceRateLimiterFallback")
-	@CircuitBreaker(name = "accountServiceCircuitBreaker", fallbackMethod = "accountServiceRateLimiterFallback")
+//	@RateLimiter(name = "accountServiceRateLimiter", fallbackMethod = "accountServiceRateLimiterFallback")
+//	@Bulkhead(name = "accountServiceBulkhead", type = Bulkhead.Type.SEMAPHORE, fallbackMethod = "accountServiceBulkheadFallback")
+//	@Retry(name = "accountServiceRetry", fallbackMethod = "accountServiceRetryFallback")
+//	@CircuitBreaker(name = "accountServiceCircuitBreaker", fallbackMethod = "accountServiceCircuitBreakerFallback")
 	@Transactional
 	public TransactionResponse transferAmount(TransactionRequest transactionRequest) {
 
@@ -80,7 +81,8 @@ public class TransactionService implements ITransactionService {
 				transactionRequest.getSenderAccountNumber(), transactionRequest.getReceiverAccountNumber());
 
 		// Calling the ACCOUNT-SERVICE to deduct/debit the balance from sender account
-		accountServiceClient.debitBalance(transactionRequest.getSenderAccountNumber(), transactionRequest.getAmount());
+		accountServiceClient.deductBalance(transactionRequest.getSenderAccountNumber(), transactionRequest.getAmount());
+		System.out.println("Deducted balance from sender account " + transactionRequest.getSenderAccountNumber() + " for amount " + transactionRequest.getAmount());
 
 		Transaction build = Transaction.builder()
 				.senderAccountNumber(transactionRequest.getSenderAccountNumber())
@@ -136,7 +138,7 @@ public class TransactionService implements ITransactionService {
 	 * @return
 	 */
 	@Override
-	public List<TransactionResponse> getTransactionHistory(Long accountNumber) {
+	public List<TransactionResponse> getTransactionHistory(String accountNumber) {
 		log.info("Get transaction history from account {}", accountNumber);
 		return transactionRepository
 				.findBySenderAccountNumberOrderByInitiatedAtDesc(accountNumber)
@@ -172,7 +174,7 @@ public class TransactionService implements ITransactionService {
 				.orElseThrow(() -> new TransactionNotFoundException("Transaction not found"));
 
 		// Match with the otp stored in REDIS in VerificationRequiredEventConsumer class
-		String otpKey = "verification:otp" + transactionReferenceNumber;
+		String otpKey = "verification:otp-" + transactionReferenceNumber;
 		String otpVal = redisTemplate.opsForValue().get(otpKey);
 		if (otpVal == null) {
 			log.warn("OTP expired for transaction: {}", transactionReferenceNumber);
@@ -225,6 +227,7 @@ public class TransactionService implements ITransactionService {
 
 			outboxEventRepository.save(outboxEvent);
 		} catch (Exception e) {
+			log.error("Failed to serialize TransactionCompletedEvent", e);
 			throw new IllegalStateException(
 					"Failed to serialize transaction completed event",
 					e
@@ -305,7 +308,7 @@ public class TransactionService implements ITransactionService {
 	 * @return
 	 */
 	@Override
-	public Long getTotalTransactionCount(Long accountNumber) {
+	public Long getTotalTransactionCount(String accountNumber) {
 		return transactionRepository.getTransactionCount(accountNumber);
 	}
 
@@ -329,4 +332,30 @@ public class TransactionService implements ITransactionService {
 		log.info("Rate limit exceeded for debit balance request from account number" + accountNumber);
 		throw new RateLimitExceededException("Rate limit exceeded for debit balance request from account number" + accountNumber);
 	}
+
+	/**
+	 * This is the fallback method for the Bulkhead of Account service
+	 */
+	public void accountServiceBulkheadFallback(Long accountNumber, BigDecimal amount, Throwable t) {
+		log.info("Bulkhead limit exceeded for debit balance request from account number" + accountNumber);
+		throw new BulkheadExceededException("Bulkhead limit exceeded for debit balance request from account number" + accountNumber);
+	}
+
+	/**
+	 * This is the fallback method for the Retry of Account service
+	 */
+	public void accountServiceRetryFallback(Long accountNumber, BigDecimal amount, Throwable t) {
+		log.info("Retry limit exceeded for debit balance request from account number" + accountNumber);
+		throw new RateLimitExceededException("Retry limit exceeded for debit balance request from account number" + accountNumber);
+	}
+
+	/**
+	 * This is the fallback method for the Circuit Breaker of Account service
+	 */
+	public void accountServiceCircuitBreakerFallback(Long accountNumber, BigDecimal amount, Throwable t) {
+		log.info("Circuit breaker limit exceeded for debit balance request from account number" + accountNumber);
+		throw new RateLimitExceededException("Circuit breaker limit exceeded for debit balance request from account number" + accountNumber);
+	}
+
+
 }

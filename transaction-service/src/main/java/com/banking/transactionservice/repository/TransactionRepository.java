@@ -14,12 +14,12 @@ import java.util.Optional;
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
     Optional<Transaction> getTransactionsByReferenceNumber(String transactionReferenceNumber);
 
-    List<Transaction> findBySenderAccountNumberOrderByInitiatedAtDesc(Long accountNumber);
+    List<Transaction> findBySenderAccountNumberOrderByInitiatedAtDesc(String senderAccountNumber);
 
     @Query(value = """
                 SELECT COUNT(*) FROM Transaction t WHERE t.senderAccountNumber = :accountNumber
             """)
-    Long getTransactionCount(@Param("accountNumber") Long accountNumber);
+    Long getTransactionCount(@Param("accountNumber") String accountNumber);
 
     Optional<Transaction> findByReferenceNumber(String referenceNumber);
 }

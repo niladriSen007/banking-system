@@ -13,8 +13,8 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class TransactionInitiatedEvent {
     private String referenceNumber;
-    private Long senderAccountNumber;
-    private Long recipientAccountNumber;
+    private String senderAccountNumber;
+    private String recipientAccountNumber;
     private BigDecimal amount;
     private String description;
 }

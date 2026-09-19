@@ -11,11 +11,11 @@ public interface ITransactionService {
 
     TransactionResponse getTransactionInfo(@Valid String transactionId);
 
-    List<TransactionResponse> getTransactionHistory(Long accountNumber);
+    List<TransactionResponse> getTransactionHistory(@Valid String accountNumber);
 
     TransactionResponse verifyOtp(String transactionReferenceNumber, @Valid String otp);
 
-    Long getTotalTransactionCount(@Valid Long accountNumber);
+    Long getTotalTransactionCount(@Valid String accountNumber);
 
     void processCleanTransaction(String referenceNumber);
 }
