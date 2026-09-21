@@ -29,7 +29,6 @@ public class Mapper {
 				.permissions(response.getUserPermissions())
 				.status(response.getStatus())
 				.createdAt(response.getCreatedAt())
-				.lastLoggedInTime(response.getLastLoggedInTime())
 				.build();
 	}
 
@@ -45,7 +44,6 @@ public class Mapper {
 				.userPermissions(entity.getPermissions())
 				.status(entity.getStatus())
 				.createdAt(entity.getCreatedAt())
-				.lastLoggedInTime(entity.getLastLoggedInTime())
 				.build();
 	}
 }

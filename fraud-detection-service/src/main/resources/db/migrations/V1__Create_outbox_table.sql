@@ -1,6 +1,5 @@
 CREATE SCHEMA IF NOT EXISTS banking;
 
-
 CREATE TABLE banking.outbox_event
 (
     id            UUID PRIMARY KEY,

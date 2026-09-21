@@ -27,15 +27,20 @@ public class AppUserDetailsService implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
+		log.info("======================================");
+		log.info("LOGIN EMAIL RECEIVED: {}", username);
+
 		//Find the user in the database
 		Optional<UserEntity> user = authRepository.findByEmail(username);
 
+		log.info("USER FOUND: {}", user.isPresent());
+
 		//If user does not exists then throw UsernameNotFound Exception
 		if (user.isEmpty()) {
-			log.info("No user found with username: " + username);
+			log.info("No user found with username: {}", username);
 			throw new UsernameNotFoundException("User with - " + username + " does not exist");
 		}
-		log.info("User with - " + username + " found from database");
+		log.info("User with - {} found from database", username);
 
 		// Add authorities
 		Set<GrantedAuthority> grantedAuthority = new HashSet<>(Set.of(new SimpleGrantedAuthority(user.get().getRole().name())));

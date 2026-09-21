@@ -1,20 +1,20 @@
 {
-  "name": "transaction-outbox-connector",
+  "name": "fraud-detection-outbox-connector",
   "config": {
     "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
 
-    "database.hostname": "postgres-transaction",
+    "database.hostname": "postgres-fraud-detection",
     "database.port": "5432",
     "database.user": "postgres",
     "database.password": "postgres",
-    "database.dbname": "transaction_db",
+    "database.dbname": "fraud_detection_db",
 
-    "topic.prefix": "transaction-service",
+    "topic.prefix": "fraud-detection-service",
 
     "plugin.name": "pgoutput",
 
-    "slot.name": "transaction_outbox_slot",
-    "publication.name": "transaction_outbox_publication",
+    "slot.name": "fraud_detection_outbox_slot",
+    "publication.name": "fraud_detection_outbox_publication",
     "publication.autocreate.mode": "filtered",
 
     "table.include.list": "banking.outbox_event",
@@ -32,13 +32,10 @@
     "transforms.outbox.type": "io.debezium.transforms.outbox.EventRouter",
 
     "transforms.outbox.route.by.field": "type",
-
     "transforms.outbox.route.topic.replacement": "${routedByValue}",
 
     "transforms.outbox.table.field.event.id": "id",
-
     "transforms.outbox.table.field.event.key": "aggregate_id",
-
     "transforms.outbox.table.field.event.payload": "payload",
 
     "transforms.outbox.table.expand.json.payload": "true"

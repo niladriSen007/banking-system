@@ -21,13 +21,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Table(
-		name = "users",
-		uniqueConstraints = {
-				@UniqueConstraint(
-						name = "uk_users_username",
-						columnNames = "username"
-				)
-		}
+		name = "users"
 )
 public class UserEntity {
 	@Id
@@ -73,8 +67,6 @@ public class UserEntity {
 	@UpdateTimestamp
 	@Column(nullable = false)
 	private LocalDateTime updatedDate;
-
-	private LocalDateTime lastLoggedInTime;
 
 	private LocalDateTime deletedAt;
 

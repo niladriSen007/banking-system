@@ -27,10 +27,10 @@ import java.util.Map;
 @Slf4j
 public class KafkaConfig {
 
-	@Value("${spring.kafka.bootstrap-servers:localhodst:9092}")
+	@Value("${spring.kafka.bootstrap-servers:localhost:9092}")
 	private String bootstrapServer;
 
-	@Value("${spring.kafka.consumer.group-id:fraud-detection-group}")
+	@Value("${spring.kafka.consumer.group-id:fraud-detection-service-group}")
 	private String groupId;
 
 	@Value("${spring.kafka.producer.properties.acks:all}")

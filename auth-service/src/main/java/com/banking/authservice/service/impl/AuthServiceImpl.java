@@ -74,7 +74,6 @@ public class AuthServiceImpl implements IAuthService {
 				.lastName(signupRequest.getLastName())
 				.phoneNumber(signupRequest.getPhoneNumber())
 				.permissions(RolePermissionMapping.getPermissionsByRole(UserRole.CUSTOMER))
-				.lastLoggedInTime(LocalDateTime.now())
 				.build();
 
 		// Saving the user into the database
@@ -111,7 +110,6 @@ public class AuthServiceImpl implements IAuthService {
 		String accessToken = jwtService.generateAccessToken(authentication, user.get().getId());
 		String refreshToken = jwtService.generateRefreshToken(authentication, user.get().getId());
 		sessionService.generateNewSession(user.get().getEmail(), refreshToken);
-		user.get().setLastLoggedInTime(LocalDateTime.now());
 		authRepository.save(user.get());
 
 		return LoginResponse.builder()

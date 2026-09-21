@@ -5,10 +5,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class NoFraudEvent {
+public class CleanTransactionEvent {
     private String referenceNumber;
+    private String senderAccountNumber;
+    private BigDecimal amount;
+    private String reason;
+    private Boolean isFraud;
 }

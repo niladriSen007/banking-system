@@ -5,11 +5,13 @@ import com.banking.frauddetectionservice.client.TransactionServiceClient;
 import com.banking.frauddetectionservice.constants.Topics;
 import com.banking.frauddetectionservice.dto.shared.ApiResponse;
 import com.banking.frauddetectionservice.dto.shared.FraudResponse;
+import com.banking.frauddetectionservice.entity.OutboxEvent;
 import com.banking.frauddetectionservice.events.CleanTransactionEvent;
 import com.banking.frauddetectionservice.events.TransactionInitiatedEvent;
 import com.banking.frauddetectionservice.events.VerificationRequiredEvent;
 import com.banking.frauddetectionservice.producer.CleanTransactionProducer;
 import com.banking.frauddetectionservice.producer.VerificationRequiredProducer;
+import com.banking.frauddetectionservice.repository.OutboxRepository;
 import com.banking.frauddetectionservice.services.IFraudDetectionService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +19,11 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -33,6 +37,8 @@ public class FraudDetectionService implements IFraudDetectionService {
     private final TransactionServiceClient transactionServiceClient;
     private final VerificationRequiredProducer verificationRequiredProducer;
     private final RedisTemplate<String, String> redisTemplate;
+    private final OutboxRepository outboxEventRepository;
+    private final ObjectMapper objectMapper;
     static int MAX_TRANSACTIONS_PER_MINUTE = 6;
     static int SUSPICIOUS_AMOUNT_MULTIPLIER = 3;
     static float MAX_BALANCE_PERCENTAGE = 0.9f;
@@ -60,11 +66,12 @@ public class FraudDetectionService implements IFraudDetectionService {
                     .isFraud(true)
                     .build();
 
-            verificationRequiredProducer.publishVerificationRequiredEvent(
-                    Topics.VERIFICATION_REQUIRED_TOPIC,
-                    transactionReferenceNumber,
-                    verificationRequireEvent
-            );
+//            verificationRequiredProducer.publishVerificationRequiredEvent(
+//                    Topics.VERIFICATION_REQUIRED_TOPIC,
+//                    transactionReferenceNumber,
+//                    verificationRequireEvent
+//            );
+            publishEvent(Topics.VERIFICATION_REQUIRED_TOPIC, transactionReferenceNumber, verificationRequireEvent);
 
             System.out.println("Verification required for transaction: " + transactionReferenceNumber+" published to topic: "+Topics.VERIFICATION_REQUIRED_TOPIC);
         } else {
@@ -77,11 +84,14 @@ public class FraudDetectionService implements IFraudDetectionService {
                     .isFraud(false)
                     .build();
 
-            cleanTransactionProducer.publishCleanTransactionEvent(
-                    Topics.FRAUD_CHECK_CLEAN_TOPIC,
-                    transactionReferenceNumber,
-                    cleanTransactionEvent
-            );
+//            cleanTransactionProducer.publishCleanTransactionEvent(
+//                    Topics.FRAUD_CHECK_CLEAN_TOPIC,
+//                    transactionReferenceNumber,
+//                    cleanTransactionEvent
+//            );
+            publishEvent(Topics.FRAUD_CHECK_CLEAN_TOPIC, transactionReferenceNumber, cleanTransactionEvent);
+
+            System.out.println("No fraud detected for transaction: " + transactionReferenceNumber+" published to topic: "+Topics.FRAUD_CHECK_CLEAN_TOPIC);
         }
 
 
@@ -145,6 +155,37 @@ public class FraudDetectionService implements IFraudDetectionService {
         log.info("Velocity check for account - {}." +
                 " Already done {} transactions from {} transactions", senderAccountNumber, count, MAX_TRANSACTIONS_PER_MINUTE);
         return count > MAX_TRANSACTIONS_PER_MINUTE;
+    }
+
+
+
+    /**
+     * Outbox pattern is used to ensure that the event is published only after the transaction is committed successfully.
+     * The event is stored in the outbox table and then published to the Kafka topic.
+     * The outbox table is then cleaned up by a scheduled job.
+     * This ensures that the event is published only after the transaction is committed successfully.
+     * The outbox table is then cleaned up by a scheduled job.
+     */
+    private void publishEvent(String topic, String referenceNumber, Object event) {
+        try {
+            String payload = objectMapper.writeValueAsString(event);
+
+            OutboxEvent outboxEvent = OutboxEvent.builder()
+                    .id(UUID.randomUUID())
+                    .aggregateType("fraud-detection-service")
+                    .aggregateId(referenceNumber)
+                    .type(topic)
+                    .payload(payload)
+                    .build();
+
+            outboxEventRepository.save(outboxEvent);
+        } catch (Exception e) {
+            log.error("Failed to serialize TransactionCompletedEvent", e);
+            throw new IllegalStateException(
+                    "Failed to serialize transaction completed event",
+                    e
+            );
+        }
     }
 
 

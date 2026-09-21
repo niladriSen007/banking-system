@@ -51,10 +51,10 @@ public class TransactionService implements ITransactionService {
 	private final RedisTemplate<String, String> redisTemplate;
 	private final TransactionRepository transactionRepository;
 	private final AccountServiceClient accountServiceClient;
-	private final TransferInitiatedProducer transferInitiatedProducer;
-	private final AmountRefundProducer amountRefundProducer;
-	private final FraudDetectedProducer fraudDetectedProducer;
-	private final TransactionCompletedProducer transactionCompletedProducer;
+//	private final TransferInitiatedProducer transferInitiatedProducer;
+//	private final AmountRefundProducer amountRefundProducer;
+//	private final FraudDetectedProducer fraudDetectedProducer;
+//	private final TransactionCompletedProducer transactionCompletedProducer;
 	private final ObjectMapper objectMapper;
 	private final OutboxRepository outboxEventRepository;
 
@@ -82,7 +82,7 @@ public class TransactionService implements ITransactionService {
 
 		// Calling the ACCOUNT-SERVICE to deduct/debit the balance from sender account
 		accountServiceClient.deductBalance(transactionRequest.getSenderAccountNumber(), transactionRequest.getAmount());
-		System.out.println("Deducted balance from sender account " + transactionRequest.getSenderAccountNumber() + " for amount " + transactionRequest.getAmount());
+		log.info("Deducted balance from sender account {}", transactionRequest.getSenderAccountNumber());
 
 		Transaction build = Transaction.builder()
 				.senderAccountNumber(transactionRequest.getSenderAccountNumber())
@@ -106,11 +106,14 @@ public class TransactionService implements ITransactionService {
 
 		// publishing the "transaction.initiated" topic so the FRAUD-DETECTION-SERVICE will consume this
 		// and do necessary checks
-		transferInitiatedProducer.publishTransactionInitiatedEvent(
-				Topic.TRANSACTION_INITIATED_TOPIC,
-				savedTransaction.getReferenceNumber(),
-				transactionInitiatedEvent
-		);
+//		transferInitiatedProducer.publishTransactionInitiatedEvent(
+//				Topic.TRANSACTION_INITIATED_TOPIC,
+//				savedTransaction.getReferenceNumber(),
+//				transactionInitiatedEvent
+//		);
+
+		publishEvent(Topic.TRANSACTION_INITIATED_TOPIC, savedTransaction.getReferenceNumber(), transactionInitiatedEvent);
+		log.info("Transaction initiated event published to topic: {} for transaction reference number: {}", Topic.TRANSACTION_INITIATED_TOPIC, savedTransaction.getReferenceNumber());
 
 		return Mapper.toTransactionResponse(savedTransaction);
 	}
@@ -197,8 +200,11 @@ public class TransactionService implements ITransactionService {
 	}
 
 	private void completeTransaction(Transaction transaction) {
+		// change the transaction status to COMPLETED and save it to the database
 		transaction.setTransactionStatus(TransactionStatus.COMPLETED);
+		// set the completedAt timestamp to the current time
 		transaction.setCompletedAt(LocalDateTime.now());
+		log.info("Completing transaction: {}", transaction.getReferenceNumber());
 		transactionRepository.save(transaction);
 
 		TransactionCompletedEvent transactionCompletedEvent = TransactionCompletedEvent
@@ -211,28 +217,8 @@ public class TransactionService implements ITransactionService {
 				.build();
 
 
-		try {
-			String payload =
-					objectMapper.writeValueAsString(transactionCompletedEvent);
-
-			OutboxEvent outboxEvent =
-					OutboxEvent.builder()
-							.id(UUID.randomUUID())
-							.aggregateType("transaction")
-							.aggregateId(
-									transaction.getReferenceNumber())
-							.type("TransactionCompleted")
-							.payload(payload)
-							.build();
-
-			outboxEventRepository.save(outboxEvent);
-		} catch (Exception e) {
-			log.error("Failed to serialize TransactionCompletedEvent", e);
-			throw new IllegalStateException(
-					"Failed to serialize transaction completed event",
-					e
-			);
-		}
+		// Publish transaction.completed event - Account service will alert user
+		publishEvent(Topic.TRANSACTION_COMPLETED_TOPIC, transaction.getReferenceNumber(), transactionCompletedEvent);
 
 //		transactionCompletedProducer.publishTransactionCompletedEvent(
 //				Topic.TRANSACTION_COMPLETED_TOPIC,
@@ -253,11 +239,13 @@ public class TransactionService implements ITransactionService {
 				.reason(reason)
 				.build();
 
-		fraudDetectedProducer.publishFraudDetectedEvent(
-				Topic.FRAUD_DETECTED_TOPIC,
-				transaction.getReferenceNumber(),
-				fraudDetectedEvent
-		);
+//		fraudDetectedProducer.publishFraudDetectedEvent(
+//				Topic.FRAUD_DETECTED_TOPIC,
+//				transaction.getReferenceNumber(),
+//				fraudDetectedEvent
+//		);
+
+		publishEvent(Topic.FRAUD_DETECTED_TOPIC, transaction.getReferenceNumber(), fraudDetectedEvent);
 
 		log.warn("fraud.detected published - account: {} will be blocked, Kindly contact to the bank",
 				transaction.getSenderAccountNumber());
@@ -270,6 +258,7 @@ public class TransactionService implements ITransactionService {
 		log.warn("SAGA COMPENSATION - refunding: {} amount: {}",
 				transaction.getSenderAccountNumber(),
 				transaction.getAmount());
+		log.info("Compensating transaction: {}", transaction.getReferenceNumber());
 		// CREDIT MONEY BACK TO SENDER SYNCHRONOUSLY
 		accountServiceClient.creditBalance(
 				transaction.getSenderAccountNumber(),
@@ -289,14 +278,40 @@ public class TransactionService implements ITransactionService {
 				.senderAccountNumber(transaction.getSenderAccountNumber())
 				.build();
 
-		amountRefundProducer.publishAmountRefundEvent(
-				Topic.TRANSACTION_REFUNDED_TOPIC,
-				transaction.getReferenceNumber(),
-				amountRefundEvent
-		);
+		publishEvent(Topic.TRANSACTION_REFUNDED_TOPIC, transaction.getReferenceNumber(), amountRefundEvent);
 
 		log.info("SAGA COMPENSATION COMPLETE - {} refunded to  {}",
 				transaction.getAmount(), transaction.getSenderAccountNumber());
+	}
+
+
+	/**
+	 * Outbox pattern is used to ensure that the event is published only after the transaction is committed successfully.
+	 * The event is stored in the outbox table and then published to the Kafka topic.
+	 * The outbox table is then cleaned up by a scheduled job.
+	 * This ensures that the event is published only after the transaction is committed successfully.
+	 * The outbox table is then cleaned up by a scheduled job.
+	 */
+	private void publishEvent(String topic, String referenceNumber, Object event) {
+		try {
+			String payload = objectMapper.writeValueAsString(event);
+
+			OutboxEvent outboxEvent = OutboxEvent.builder()
+					.id(UUID.randomUUID())
+					.aggregateType("transaction")
+					.aggregateId(referenceNumber)
+					.type(topic)
+					.payload(payload)
+					.build();
+
+			outboxEventRepository.save(outboxEvent);
+		} catch (Exception e) {
+			log.error("Failed to serialize TransactionCompletedEvent", e);
+			throw new IllegalStateException(
+					"Failed to serialize transaction completed event",
+					e
+			);
+		}
 	}
 
 

@@ -16,6 +16,6 @@ public class CleanTransactionEvent {
     private String senderAccountNumber;
     private BigDecimal amount;
     private String reason;
-    private boolean isFraud;
+    private Boolean isFraud;
 }
 
