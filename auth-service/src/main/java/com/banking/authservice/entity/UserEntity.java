@@ -11,7 +11,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -43,8 +45,17 @@ public class UserEntity {
 	@Column(nullable = false)
 	private String phoneNumber;
 
+	private String headline;
+
+	private String about;
+
+	private String location;
+
 	@Column
 	private String profileImage;
+
+	@Column
+	private String coverImage;
 
 	@Builder.Default
 	@Column(nullable = false)
@@ -59,6 +70,16 @@ public class UserEntity {
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private UserStatus status = UserStatus.ACTIVE;
+
+	@ElementCollection
+	@CollectionTable(
+			name = "user_skills",
+			joinColumns = @JoinColumn(
+					name = "user_id"
+			)
+	)
+	@Column(name = "skills")
+	private List<String> skills = new ArrayList<>();
 
 	@CreationTimestamp
 	@Column(nullable = false, updatable = false)

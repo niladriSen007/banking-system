@@ -1,0 +1,43 @@
+{
+  "name": "connection-outbox-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+
+    "database.hostname": "postgres-connection",
+    "database.port": "5432",
+    "database.user": "postgres",
+    "database.password": "postgres",
+    "database.dbname": "connection_db",
+
+    "topic.prefix": "connection-service",
+
+    "plugin.name": "pgoutput",
+
+    "slot.name": "connection_outbox_slot",
+    "publication.name": "connection_outbox_publication",
+    "publication.autocreate.mode": "filtered",
+
+    "table.include.list": "banking.outbox_event",
+
+    "snapshot.mode": "initial",
+
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+
+    "key.converter.schemas.enable": "false",
+    "value.converter.schemas.enable": "false",
+
+    "transforms": "outbox",
+
+    "transforms.outbox.type": "io.debezium.transforms.outbox.EventRouter",
+
+    "transforms.outbox.route.by.field": "type",
+    "transforms.outbox.route.topic.replacement": "${routedByValue}",
+
+    "transforms.outbox.table.field.event.id": "id",
+    "transforms.outbox.table.field.event.key": "aggregate_id",
+    "transforms.outbox.table.field.event.payload": "payload",
+
+    "transforms.outbox.table.expand.json.payload": "true"
+  }
+}

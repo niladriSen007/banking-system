@@ -18,21 +18,25 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
         </processorPath>
+        <module name="auth-service" />
         <module name="payment-service" />
+        <module name="search-service" />
+        <module name="feed-service" />
+        <module name="fraud-detection-service" />
         <module name="api-gateway" />
         <module name="transaction-service" />
         <module name="account-service" />
         <module name="notification-service" />
       </profile>
-      <profile name="Annotation profile for auth-service" enabled="true">
+      <profile name="Annotation profile for post-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
         </processorPath>
-        <module name="auth-service" />
-        <module name="fraud-detection-service" />
+        <module name="connection-service" />
+        <module name="post-service" />
       </profile>
     </annotationProcessing>
   </component>
@@ -42,9 +46,13 @@
       <module name="api-gateway" options="-parameters" />
       <module name="auth-service" options="-parameters" />
       <module name="config-server" options="-parameters" />
+      <module name="connection-service" options="-parameters" />
+      <module name="feed-service" options="-parameters" />
       <module name="fraud-detection-service" options="-parameters" />
       <module name="notification-service" options="-parameters" />
       <module name="payment-service" options="-parameters" />
+      <module name="post-service" options="-parameters" />
+      <module name="search-service" options="-parameters" />
       <module name="service-discovery" options="-parameters" />
       <module name="transaction-service" options="-parameters" />
     </option>

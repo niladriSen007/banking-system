@@ -5,6 +5,7 @@ services:
   # =========================================================
   # REDIS
   # =========================================================
+
   redis:
     image: redis:latest
     container_name: redis
@@ -22,6 +23,7 @@ services:
   # =========================================================
   # POSTGRESQL - AUTH SERVICE
   # =========================================================
+
   postgres-auth:
     image: postgres:18
     container_name: postgres-auth
@@ -53,6 +55,7 @@ services:
   # =========================================================
   # POSTGRESQL - TRANSACTION SERVICE
   # =========================================================
+
   postgres-transaction:
     image: postgres:18
     container_name: postgres-transaction
@@ -81,10 +84,10 @@ services:
       - banking-network
 
 
-
   # =========================================================
   # POSTGRESQL - ACCOUNT SERVICE
   # =========================================================
+
   postgres-account:
     image: postgres:18
     container_name: postgres-account
@@ -114,8 +117,9 @@ services:
 
 
   # =========================================================
-  # POSTGRESQL - fraud detection SERVICE
+  # POSTGRESQL - FRAUD DETECTION SERVICE
   # =========================================================
+
   postgres-fraud-detection:
     image: postgres:18
     container_name: postgres-fraud-detection
@@ -144,9 +148,90 @@ services:
       - banking-network
 
 
+  cassandra-post:
+    image: cassandra:5.0
+    container_name: post-service-cassandra
+    ports:
+      - "9042:9042"
+    environment:
+      CASSANDRA_CLUSTER_NAME: post-service-cluster
+      CASSANDRA_DC: datacenter1
+      CASSANDRA_RACK: rack1
+      MAX_HEAP_SIZE: 1G
+      HEAP_NEWSIZE: 256M
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+
+
+  # =========================================================
+  # MINIO - OBJECT STORAGE
+  # =========================================================
+
+#  minio:
+#    image: minio/minio:latest
+#    container_name: minio
+#
+#    command: server /data --console-address ":9001"
+#
+#    environment:
+#      MINIO_ROOT_USER: minioadmin
+#      MINIO_ROOT_PASSWORD: minioadmin123
+#
+#    ports:
+#      # S3 API
+#      - "9000:9000"
+#
+#      # MinIO Web Console
+#      - "9001:9001"
+#
+#    volumes:
+#      - minio-data:/data
+#
+#    healthcheck:
+#      test:
+#        [
+#          "CMD",
+#          "curl",
+#          "-f",
+#          "http://localhost:9000/minio/health/live"
+#        ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+#      start_period: 10s
+#
+#    networks:
+#      - banking-network
+
+
+  # =========================================================
+  # MINIO INITIALIZATION
+  # Creates the bucket automatically
+  # =========================================================
+
+#  minio-init:
+#    image: minio/mc:latest
+#    container_name: minio-init
+#
+#    depends_on:
+#      minio:
+#        condition: service_healthy
+#
+#    entrypoint: >
+#      /bin/sh -c "
+#      mc alias set local http://minio:9000 minioadmin minioadmin123;
+#      mc mb --ignore-existing local/banking-images;
+#      echo 'MinIO bucket banking-images is ready';
+#      "
+#
+#    networks:
+#      - banking-network
+
+
   # =========================================================
   # KAFKA - KRaft MODE
   # =========================================================
+
   kafka:
     image: confluentinc/cp-kafka:7.7.1
     container_name: kafka
@@ -160,6 +245,7 @@ services:
       # -----------------------------
       # KRaft
       # -----------------------------
+
       KAFKA_NODE_ID: 1
 
       KAFKA_PROCESS_ROLES: "broker,controller"
@@ -172,6 +258,7 @@ services:
       # -----------------------------
       # Listeners
       # -----------------------------
+
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: >
         CONTROLLER:PLAINTEXT,
         PLAINTEXT:PLAINTEXT,
@@ -192,12 +279,14 @@ services:
       # -----------------------------
       # Kafka Cluster
       # -----------------------------
+
       CLUSTER_ID: "EmptNWtoR4GGWx-BH6nGLQ"
 
 
       # -----------------------------
       # Single broker settings
       # -----------------------------
+
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
@@ -212,6 +301,7 @@ services:
       # -----------------------------
       # Development
       # -----------------------------
+
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
 
     networks:
@@ -221,6 +311,7 @@ services:
   # =========================================================
   # KAFKA UI
   # =========================================================
+
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-cluster-ui
@@ -243,6 +334,7 @@ services:
   # =========================================================
   # DEBEZIUM + KAFKA CONNECT
   # =========================================================
+
   debezium-connect:
     image: quay.io/debezium/connect:3.6
     container_name: debezium-connect
@@ -259,6 +351,7 @@ services:
       # -----------------------------
       # Kafka Connect
       # -----------------------------
+
       GROUP_ID: "1"
 
       BOOTSTRAP_SERVERS: kafka:29092
@@ -267,18 +360,24 @@ services:
       # -----------------------------
       # Kafka Connect internal topics
       # -----------------------------
+
       CONFIG_STORAGE_TOPIC: connect_configs
+
       OFFSET_STORAGE_TOPIC: connect_offsets
+
       STATUS_STORAGE_TOPIC: connect_status
 
       CONFIG_STORAGE_REPLICATION_FACTOR: 1
+
       OFFSET_STORAGE_REPLICATION_FACTOR: 1
+
       STATUS_STORAGE_REPLICATION_FACTOR: 1
 
 
       # -----------------------------
       # Converters
       # -----------------------------
+
       KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
 
       VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
@@ -291,6 +390,7 @@ services:
       # -----------------------------
       # REST API
       # -----------------------------
+
       REST_HOST_NAME: 0.0.0.0
 
       REST_ADVERTISED_HOST_NAME: debezium-connect
@@ -302,22 +402,27 @@ services:
 # ===========================================================
 # VOLUMES
 # ===========================================================
-volumes:
 
-  postgres-transaction-data:
+volumes:
 
   redis-data:
 
   postgres-auth-data:
 
+  postgres-transaction-data:
+
   postgres-account-data:
 
   postgres-fraud-detection-data:
 
+#  minio-data:
+
+  cassandra_data:
 
 # ===========================================================
 # NETWORK
 # ===========================================================
+
 networks:
 
   banking-network:

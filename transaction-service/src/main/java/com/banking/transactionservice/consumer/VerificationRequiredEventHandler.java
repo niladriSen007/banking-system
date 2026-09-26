@@ -1,21 +1,22 @@
 package com.banking.transactionservice.consumer;
 
 import com.banking.transactionservice.constants.Topic;
+import com.banking.transactionservice.entity.OutboxEvent;
 import com.banking.transactionservice.entity.Transaction;
 import com.banking.transactionservice.entity.TransactionStatus;
 import com.banking.transactionservice.event.SendOtpEvent;
 import com.banking.transactionservice.event.VerificationRequiredEvent;
 import com.banking.transactionservice.exceptions.TransactionNotFoundException;
 import com.banking.transactionservice.producer.SendOtpProducer;
+import com.banking.transactionservice.repository.OutboxRepository;
 import com.banking.transactionservice.repository.TransactionRepository;
-import com.banking.transactionservice.service.ITransactionService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -25,6 +26,8 @@ public class VerificationRequiredEventHandler
 		implements KafkaEventHandler<VerificationRequiredEvent> {
 
 	private final TransactionRepository transactionRepository;
+	private final OutboxRepository outboxEventRepository;
+	private final ObjectMapper objectMapper;
 	private final RedisTemplate<String, String> redisTemplate;
 	private final SendOtpProducer sendOtpProducer;
 	private static final long OTP_EXPIRY_MINUTES = 5;
@@ -70,6 +73,27 @@ public class VerificationRequiredEventHandler
 				.reason(verificationEvent.getReason())
 				.amount(verificationEvent.getAmount())
 				.build();
+
+
+		try {
+			String payload = objectMapper.writeValueAsString(otpEvent);
+
+			OutboxEvent outboxEvent = OutboxEvent.builder()
+					.id(UUID.randomUUID())
+					.aggregateType("transaction")
+					.aggregateId(transaction.getReferenceNumber())
+					.type(Topic.VERIFICATION_OTP_GENERATED_TOPIC)
+					.payload(payload)
+					.build();
+
+			outboxEventRepository.save(outboxEvent);
+		} catch (Exception e) {
+			log.error("Failed to serialize TransactionCompletedEvent", e);
+			throw new IllegalStateException(
+					"Failed to serialize transaction completed event",
+					e
+			);
+		}
 
 		sendOtpProducer.publishSendOtpEvent(
 				Topic.VERIFICATION_OTP_GENERATED_TOPIC,

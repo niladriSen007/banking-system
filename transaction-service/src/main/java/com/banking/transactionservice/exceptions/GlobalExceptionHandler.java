@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(TransactionNotFoundException.class)
-    public ResponseEntity<ApiResponse> handleTransactionNotFoundException(TransactionNotFoundException e) {
+    public ResponseEntity<ApiResponse<Void>> handleTransactionNotFoundException(TransactionNotFoundException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(ApiResponse.error(e.getMessage(), HttpStatus.FORBIDDEN.value()));
     }
