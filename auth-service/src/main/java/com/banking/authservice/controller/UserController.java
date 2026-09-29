@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/v1/auth/users")
 @Slf4j
 public class UserController {
 	private final IUserService userService;
@@ -29,6 +29,12 @@ public class UserController {
 	                                                                   @RequestBody UpdateRequest updateRequest) {
 		return ResponseEntity.ok(ApiResponse.success(userService.updateUser(email, updateRequest), 200));
 	}
+
+	@GetMapping("/all")
+	public ResponseEntity<ApiResponse<List<UserResponse>>> getUsersById(@RequestParam List<String> userIds) {
+		return ResponseEntity.ok(ApiResponse.success(userService.getUsersById(userIds), 200));
+	}
+
 
 	@GetMapping("/{userId}")
 	public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable String userId) {

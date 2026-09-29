@@ -30,7 +30,6 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -147,13 +146,15 @@ public class AuthServiceImpl implements IAuthService {
 		Optional<UserEntity> userFromToken = authRepository.findById(userIdFromToken);
 		if (userFromToken.isEmpty())
 			throw new AuthenticationServiceException("User not found");
-		// UserDetails userDetails =
-		// appUserDetailsService.loadUserByUsername(userFromToken.get().getEmail());
 		if (!jwtService.validateToken(refreshTokenValue)) {
 			throw new JwtException("Invalid refresh token");
 		}
-		String accessToken = jwtService.generateAccessToken(SecurityContextHolder.getContext().getAuthentication(),
-				Long.valueOf(userIdFromToken));
+		UserDetails userDetails = appUserDetailsService.loadUserByUsername(userFromToken.get().getEmail());
+		Authentication authentication = new UsernamePasswordAuthenticationToken(
+				userDetails,
+				null,
+				userDetails.getAuthorities());
+		String accessToken = jwtService.generateAccessToken(authentication, Long.valueOf(userIdFromToken));
 		log.info("Refresh token validated and new tokens generated for user: {}", userFromToken.get().getEmail());
 		return RefreshResponse.builder()
 				.title("Access token generated successfully")

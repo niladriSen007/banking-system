@@ -147,83 +147,55 @@ services:
     networks:
       - banking-network
 
+  # =========================================================
+  # POSTGRESQL - FRAUD DETECTION SERVICE
+  # =========================================================
 
-  cassandra-post:
-    image: cassandra:5.0
-    container_name: post-service-cassandra
-    ports:
-      - "9042:9042"
+  postgres-post:
+    image: postgres:18
+    container_name: postgres-post
+
     environment:
-      CASSANDRA_CLUSTER_NAME: post-service-cluster
-      CASSANDRA_DC: datacenter1
-      CASSANDRA_RACK: rack1
-      MAX_HEAP_SIZE: 1G
-      HEAP_NEWSIZE: 256M
+      POSTGRES_DB: post_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    command:
+      - postgres
+      - -c
+      - wal_level=logical
+      - -c
+      - max_wal_senders=10
+      - -c
+      - max_replication_slots=10
+
+    ports:
+      - "5436:5432"
+
     volumes:
-      - cassandra_data:/var/lib/cassandra
+      - postgres-post-data:/var/lib/postgresql
 
+    networks:
+      - banking-network
 
-  # =========================================================
-  # MINIO - OBJECT STORAGE
-  # =========================================================
-
-#  minio:
-#    image: minio/minio:latest
-#    container_name: minio
-#
-#    command: server /data --console-address ":9001"
-#
-#    environment:
-#      MINIO_ROOT_USER: minioadmin
-#      MINIO_ROOT_PASSWORD: minioadmin123
-#
+#  # =========================================================
+#  # CASSANDRA - POST SERVICE
+#  # =========================================================
+#  cassandra-post:
+#    image: cassandra:5.0
+#    container_name: post-service-cassandra
 #    ports:
-#      # S3 API
-#      - "9000:9000"
-#
-#      # MinIO Web Console
-#      - "9001:9001"
-#
+#      - "9042:9042"
+#    environment:
+#      CASSANDRA_CLUSTER_NAME: post-service-cluster
+#      CASSANDRA_DC: datacenter1
+#      CASSANDRA_RACK: rack1
+#      MAX_HEAP_SIZE: 1G
+#      HEAP_NEWSIZE: 256M
 #    volumes:
-#      - minio-data:/data
-#
-#    healthcheck:
-#      test:
-#        [
-#          "CMD",
-#          "curl",
-#          "-f",
-#          "http://localhost:9000/minio/health/live"
-#        ]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 5
-#      start_period: 10s
-#
-#    networks:
-#      - banking-network
-
-
-  # =========================================================
-  # MINIO INITIALIZATION
-  # Creates the bucket automatically
-  # =========================================================
-
-#  minio-init:
-#    image: minio/mc:latest
-#    container_name: minio-init
-#
-#    depends_on:
-#      minio:
-#        condition: service_healthy
-#
-#    entrypoint: >
-#      /bin/sh -c "
-#      mc alias set local http://minio:9000 minioadmin minioadmin123;
-#      mc mb --ignore-existing local/banking-images;
-#      echo 'MinIO bucket banking-images is ready';
-#      "
-#
+#      # Mounts your custom local cassandra.yaml configurations to enable CDC options automatically
+#      - ./debezium/cassandra.yaml:/etc/cassandra/cassandra.yaml
+#      - cassandra_data:/var/lib/cassandra
 #    networks:
 #      - banking-network
 
@@ -332,7 +304,7 @@ services:
 
 
   # =========================================================
-  # DEBEZIUM + KAFKA CONNECT
+  # DEBEZIUM + KAFKA CONNECT (For PostgreSQL Engine Connectors)
   # =========================================================
 
   debezium-connect:
@@ -342,6 +314,8 @@ services:
     depends_on:
       - kafka
       - postgres-transaction
+      - postgres-fraud-detection
+      - postgres-post
 
     ports:
       - "8083:8083"
@@ -384,46 +358,85 @@ services:
 
       KEY_CONVERTER_SCHEMAS_ENABLE: "false"
 
-      VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
-
-
-      # -----------------------------
-      # REST API
-      # -----------------------------
-
-      REST_HOST_NAME: 0.0.0.0
-
-      REST_ADVERTISED_HOST_NAME: debezium-connect
-
     networks:
       - banking-network
 
 
-# ===========================================================
-# VOLUMES
-# ===========================================================
+  # =========================================================
+  # STANDALONE DEBEZIUM CASSANDRA AGENT (Debezium Server)
+  # =========================================================
+#  debezium-cassandra-agent:
+#    image: quay.io/debezium/server:3.0.1.Final
+#    container_name: debezium-cassandra-agent
+#    depends_on:
+#      cassandra-post:
+#        condition: service_started
+#      kafka:
+#        condition: service_started
+#    environment:
+#      # 1. Target Broker Sink Environment Destination
+#      - DEBEZIUM_SINK_TYPE=kafka
+#      - DEBEZIUM_SINK_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+#
+#      # --- ADD THESE TWO LINES TO FIX THE SERIALIZER ERROR ---
+#      - DEBEZIUM_SINK_KAFKA_KEY_SERIALIZER=org.apache.kafka.common.serialization.StringSerializer
+#      - DEBEZIUM_SINK_KAFKA_VALUE_SERIALIZER=org.apache.kafka.common.serialization.StringSerializer
+#      # -------------------------------------------------------
+#
+#      # 2. Source Infrastructure Mapping Layouts
+#      - DEBEZIUM_SOURCE_CONNECTOR_CLASS=io.debezium.connector.cassandra.CassandraConnector
+#      - DEBEZIUM_SOURCE_CONNECTOR_NAME=cassandra-outbox-connector
+#
+#      # 3. Connection Targets
+#      - DEBEZIUM_SOURCE_CASSANDRA_HOSTS=cassandra-post
+#      - DEBEZIUM_SOURCE_CASSANDRA_PORT=9042
+#      - DEBEZIUM_SOURCE_CASSANDRA_CONFIG=/etc/cassandra/cassandra.yaml
+#
+#      # 4. CDC Directories Tracking Logic
+#      - DEBEZIUM_SOURCE_COMMIT_LOG_RELOCATION_DIR=/var/lib/cassandra/debezium_cdc_relocation
+#      - DEBEZIUM_SOURCE_COMMIT_LOG_REAL_TIME_PROCESSING_ENABLED=true
+#
+#      # 5. Scoping Filters (Watch ONLY the outbox table)
+#      - DEBEZIUM_SOURCE_TABLE_INCLUDE_LIST=post_service.outbox_events
+#      - DEBEZIUM_SOURCE_TOPIC_PREFIX=post_service_cdc
+#
+#      # 6. Serializers Configuration
+#      - DEBEZIUM_SOURCE_KEY_CONVERTER=org.apache.kafka.connect.json.JsonConverter
+#      - DEBEZIUM_SOURCE_VALUE_CONVERTER=org.apache.kafka.connect.json.JsonConverter
+#      - DEBEZIUM_SOURCE_KEY_CONVERTER_SCHEMAS_ENABLE=false
+#      - DEBEZIUM_SOURCE_VALUE_CONVERTER_SCHEMAS_ENABLE=false
+#
+#      # 7. Outbox Single Message Transform (SMT) Routing Setup
+#      - DEBEZIUM_SOURCE_TRANSFORMS=outbox
+#      - DEBEZIUM_SOURCE_TRANSFORMS_OUTBOX_TYPE=io.debezium.transforms.outbox.EventRouter
+#      - DEBEZIUM_SOURCE_TRANSFORMS_OUTBOX_ROUTE_BY_FIELD=aggregate_type
+#      - DEBEZIUM_SOURCE_TRANSFORMS_OUTBOX_ID_BY_FIELD=event_id
+#    volumes:
+#      - ./debezium/cassandra.yaml:/etc/cassandra/cassandra.yaml
+#      - cassandra_data:/var/lib/cassandra
+#      - debezium-cassandra-offsets:/debezium/data
+#    restart: on-failure
+#    networks:
+#      - banking-network
 
+
+# =========================================================
+# VOLUMES DECLARATION
+# =========================================================
 volumes:
-
   redis-data:
-
   postgres-auth-data:
-
   postgres-transaction-data:
-
   postgres-account-data:
-
   postgres-fraud-detection-data:
+  postgres-post-data:
+#  cassandra_data:
+#  debezium-cassandra-offsets:
 
-#  minio-data:
 
-  cassandra_data:
-
-# ===========================================================
-# NETWORK
-# ===========================================================
-
+# =========================================================
+# NETWORKS DECLARATION
+# =========================================================
 networks:
-
   banking-network:
     driver: bridge

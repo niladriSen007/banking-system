@@ -63,7 +63,25 @@ public class AuthController {
 
 	@PostMapping("/refresh-token")
 	public ResponseEntity<ApiResponse<RefreshResponse>> refreshToken(HttpServletRequest request, HttpServletResponse response) {
-		return ResponseEntity.ok(ApiResponse.success(authService.refreshToken(request, response), 200));
+
+		RefreshResponse refreshResponse = authService.refreshToken(request, response);
+
+		// Storing the refresh token into the cookie for the next 180 days
+		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshResponse.getRefreshToken())
+				.httpOnly(true)
+				.path("/")
+				.maxAge(Duration.ofDays(180)) // 180 days
+				.sameSite("Strict")
+				.build();
+
+		// Storing the access token into the cookie for the next 15 minutes
+		ResponseCookie accessCookie = ResponseCookie.from("accessToken", refreshResponse.getAccessToken())
+				.httpOnly(true)
+				.path("/")
+				.maxAge(Duration.ofMinutes(15))
+				.sameSite("Strict")
+				.build();
+		return ResponseEntity.ok(ApiResponse.success(refreshResponse, 200));
 	}
 
 	@GetMapping("/hi")

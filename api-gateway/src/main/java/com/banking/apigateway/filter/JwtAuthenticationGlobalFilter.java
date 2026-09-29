@@ -118,7 +118,7 @@ public class JwtAuthenticationGlobalFilter implements GlobalFilter, Ordered {
 							if (result.userEmail() != null) {
 
 								headers.add(
-										"X-UserEmail",
+										"X-User-Email",
 										result.userEmail()
 								);
 							}

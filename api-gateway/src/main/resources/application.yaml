@@ -5,6 +5,24 @@ spring:
     gateway:
       server:
         webflux:
+          globalcors:
+            add-to-simple-url-handler-mapping: true
+            cors-configurations:
+              '[/**]':
+                allowedOrigins:
+                  - http://localhost:5173
+#                  - http://localhost:5174
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - PATCH
+                  - DELETE
+                  - OPTIONS
+                allowedHeaders: "*"
+                allowCredentials: true
+          default-filters:
+            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
           routes:
             - id: transaction-service
               uri: lb://TRANSACTION-SERVICE
@@ -50,8 +68,7 @@ jwt:
   public-paths:
     - /api/v1/auth/login
     - /api/v1/auth/signup
+    - /api/v1/auth/refresh-token
     - /api/v1/auth/register
     - /api/v1/actuator/health
-
-
 

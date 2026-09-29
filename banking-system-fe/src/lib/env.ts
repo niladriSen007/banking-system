@@ -1,3 +1,3 @@
 export const env = {
-    BACKEND_URL: import.meta.env.BACKEND_URL ?? "http://localhost:4000"
+    BACKEND_URL: import.meta.env.BACKEND_URL ?? "http://localhost:4000/api/v1"
 }

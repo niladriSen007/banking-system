@@ -3,10 +3,26 @@ import { api } from "./api";
 import axios from "axios";
 import type { ApiResponse } from "./types";
 
+function getApiErrorMessage(data: unknown) {
+  if (typeof data !== "object" || data === null) {
+    return undefined;
+  }
+
+  const response = data as Partial<ApiResponse<unknown>>;
+  if (typeof response.error === "string" && response.error.length > 0) {
+    return response.error;
+  }
+
+  const firstError = response.errors?.[0]?.message;
+  return typeof firstError === "string" && firstError.length > 0
+    ? firstError
+    : undefined;
+}
+
 function getErrorMessage(error: unknown) {
   if (axios.isAxiosError(error)) {
     return (
-      error.response?.data?.errors?.at(0)?.message ||
+      getApiErrorMessage(error.response?.data) ||
       error.message ||
       "Request failed"
     );
@@ -27,7 +43,7 @@ export async function GET<T>(url: string, config?: AxiosRequestConfig) {
       response.data.status !== "success" ||
       response.data.statusCode !== 200
     ) {
-      throw new Error(response.data.errors?.at(0)?.message || "Request failed");
+      throw new Error(getApiErrorMessage(response.data) || "Request failed");
     }
 
     return response.data.data;
@@ -46,13 +62,12 @@ export async function POST<TResponse, TRequest = unknown>(
 
     if (
       response.data.status !== "success" ||
-      response.data.statusCode !== 200
+      ![200, 201].includes(response.data.statusCode)
     ) {
-      throw new Error(response.data.errors?.at(0)?.message || "Request failed");
+      throw new Error(getApiErrorMessage(response.data) || "Request failed");
     }
-
     return response.data.data;
-  } catch (error: unknown) {
+} catch (error: unknown) {
     throw new Error(getErrorMessage(error), { cause: error });
   }
 }
@@ -69,7 +84,7 @@ export async function PUT<TResponse, TRequest = unknown>(
       response.data.status !== "success" ||
       response.data.statusCode !== 200
     ) {
-      throw new Error(response.data.errors?.at(0)?.message || "Request failed");
+      throw new Error(getApiErrorMessage(response.data) || "Request failed");
     }
 
     return response.data.data;
@@ -90,7 +105,7 @@ export async function PATCH<TResponse, TRequest = unknown>(
       response.data.status !== "success" ||
       response.data.statusCode !== 200
     ) {
-      throw new Error(response.data.errors?.at(0)?.message || "Request failed");
+      throw new Error(getApiErrorMessage(response.data) || "Request failed");
     }
 
     return response.data.data;
@@ -109,7 +124,7 @@ export async function DELETE<TResponse>(
       response.data.status !== "success" ||
       response.data.statusCode !== 200
     ) {
-      throw new Error(response.data.errors?.at(0)?.message || "Request failed");
+      throw new Error(getApiErrorMessage(response.data) || "Request failed");
     }
 
     return response.data.data;

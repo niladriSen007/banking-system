@@ -134,6 +134,9 @@ public class JWTService {
 		return Jwts.builder().
 				subject(userId.toString())
 				.issuer(jwtProperties.getIssuer())
+				.audience()
+				.add(jwtProperties.getAudience())
+				.and()
 				.issuedAt(new Date())
 				.expiration(
 						new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 30 * 6) // 6 months

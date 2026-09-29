@@ -2,35 +2,53 @@ import { create } from "zustand";
 
 type AuthStatus = "idle" | "loading" | "ready" | "error";
 
+export type UserRole = "admin" | "customer";
+
+export type UserState = {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole[];
+};
+
 type AuthStore = {
   status: AuthStatus;
-  user: null;
+  user: UserState | null;
+  accessToken: string | null;
   error: string | null;
   isAuthenticated: boolean;
 
+  setIsAuthenticated: (authenticated: boolean) => void;
+  setAccessToken: (accessToken: string | null) => void;
   setLoading: () => void;
-  setUser: (user: null) => void;
+  setUser: (user: UserState | null) => void;
   setError: (errorMessage: string) => void;
   logout: () => void;
 };
 
 export const useAuthStore = create<AuthStore>((set) => ({
-  status: "idle",
+  status: "loading",
   user: null,
+  accessToken: null,
   error: null,
   isAuthenticated: false,
 
+  setIsAuthenticated: (authenticated: boolean) =>
+    set({
+      isAuthenticated: authenticated,
+    }),
+  setAccessToken: (accessToken: string | null) => set({ accessToken }),
   setLoading: () =>
     set({
       status: "loading",
       error: null,
     }),
-  setUser: (user) =>
+  setUser: (user: UserState | null) =>
     set({
       status: "ready",
       error: null,
       user,
-      isAuthenticated: true,
+      isAuthenticated: user !== null,
     }),
   setError: (error) =>
     set({
@@ -45,5 +63,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
       error: null,
       isAuthenticated: false,
       user: null,
+      accessToken: null,
     }),
 }));

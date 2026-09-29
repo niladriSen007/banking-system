@@ -2,11 +2,13 @@ export type ApiResponse<T> = {
     status: "success" | "error";
     statusCode: number;
     data: T | null;
+    error?: string;
     meta?: Record<string, unknown>,
-    errors: ApiError[]
+    errors?: ApiError[]
 }
 
 export type ApiError = {
     message?: string;
     code?: string
 }
+

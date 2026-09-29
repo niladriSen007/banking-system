@@ -1,8 +1,12 @@
+import { Toaster } from "./components/ui/toast";
+import { QueryClientProvider } from "./provider/tanstack-query-client-provider";
 
 const App = () => {
   return (
-    <div>App</div>
-  )
-}
+    <QueryClientProvider>
+      <Toaster />
+    </QueryClientProvider>
+  );
+};
 
-export default App
+export default App;

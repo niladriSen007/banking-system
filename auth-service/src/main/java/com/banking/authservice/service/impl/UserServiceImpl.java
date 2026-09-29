@@ -63,6 +63,11 @@ public class UserServiceImpl implements IUserService {
 		return Mapper.toUserResponse(updatedUser);
 	}
 
+	@Override
+	public List<UserResponse> getUsersById(List<String> userIds) {
+		return authRepository.findUsersById(userIds);
+	}
+
 //	@Override
 //	public UserResponse suspendUser(Long userId) {
 //		return authRepository.findById(userId).map(user -> {

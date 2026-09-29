@@ -1,0 +1,435 @@
+{
+  "layout": {
+    "navbar": {
+      "brandName": "Nexora",
+      "brandHomeLabel": "Nexora home",
+      "account": "Account",
+      "myAccount": "My Account",
+      "logout": "Log out",
+      "signIn": "Sign in",
+      "menuLabel": "Menu"
+    }
+  },
+  "auth": {
+    "signIn": {
+      "shellLabel": "Sign in to Nexora",
+      "brandHomeLabel": "Nexora home",
+      "brandName": "Nexora",
+      "heroEyebrow": "Money moves. Careers grow.",
+      "heroTitle": "Your money and your network, finally together.",
+      "heroDescription": "Send money securely, build meaningful connections, and make your next move from one beautifully simple place.",
+      "avatarInitials": ["AJ", "MK", "SR", "+"],
+      "communityCaption": "Built around your future",
+      "welcomeEyebrow": "Welcome back",
+      "title": "Sign in to Nexora",
+      "subtitle": "Your professional life, connected and secure.",
+      "fields": {
+        "email": {
+          "label": "Email",
+          "placeholder": "you@example.com"
+        },
+        "password": {
+          "label": "Password",
+          "placeholder": "Enter your password"
+        }
+      },
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "signupPrompt": "New to Nexora?",
+      "signupLink": "Create an account",
+      "footerLabel": "Account security",
+      "footerItems": ["Privacy", "Terms", "Secure sign-in"]
+    },
+    "signUp": {
+      "shellLabel": "Create a Nexora account",
+      "welcomeEyebrow": "Get started",
+      "title": "Create your account",
+      "subtitle": "Join Nexora to grow your network and move forward.",
+      "fields": {
+        "firstName": {
+          "label": "First name",
+          "placeholder": "Alex"
+        },
+        "lastName": {
+          "label": "Last name",
+          "placeholder": "Morgan"
+        },
+        "email": {
+          "label": "Email address",
+          "placeholder": "you@example.com"
+        },
+        "phoneNumber": {
+          "label": "Phone number",
+          "placeholder": "Enter your phone number"
+        },
+        "password": {
+          "label": "Password",
+          "placeholder": "Create a password"
+        }
+      },
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "submit": "Create account",
+      "submitting": "Creating account...",
+      "signinPrompt": "Already on Nexora?",
+      "signinLink": "Sign in",
+      "footerLabel": "Account information",
+      "footerItems": ["Privacy", "Terms", "Help"]
+    }
+  },
+  "banking": {
+    "paySetup": {
+      "shellLabel": "Create a Nexora Pay account",
+      "timeEstimate": "Takes about 60 seconds",
+      "eyebrow": "One-time setup",
+      "title": "Create your Pay account",
+      "description": "Unlock instant payments, smart tracking, and safer transfers, all from your Nexora identity.",
+      "benefits": ["Fraud protected", "Instant arrival", "Earn rewards"],
+      "fields": {
+        "accountHolderName": {
+          "label": "Account holder name",
+          "placeholder": "Full legal name"
+        },
+        "phoneNumber": {
+          "label": "Phone number",
+          "placeholder": "+1 415 555 0182"
+        },
+        "email": {
+          "label": "Email address",
+          "placeholder": "you@example.com"
+        },
+        "password": {
+          "label": "Password",
+          "placeholder": "Create a password"
+        },
+        "upiId": {
+          "label": "Choose your Pay ID",
+          "placeholder": "name@nexora"
+        }
+      },
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "terms": "I agree to the Nexora Pay terms and authorize identity verification for secure transfers.",
+      "submit": "Create Pay account",
+      "unavailable": "Pay account creation is not connected yet. Your information has not been submitted.",
+      "errors": {
+        "required": "This field is required.",
+        "email": "Enter a valid email address.",
+        "terms": "Accept the terms to continue."
+      }
+    },
+    "payDashboard": {
+      "accountStatus": "Account active",
+      "balanceLabel": "Available balance",
+      "payIdLabel": "Pay ID",
+      "payId": "alex.morgan@nexora",
+      "summary": {
+        "sent": "Sent this month",
+        "received": "Received",
+        "rewards": "Rewards"
+      },
+      "summaryValues": {
+        "sent": "$2,840",
+        "received": "$3,120",
+        "rewards": "1,260 pts"
+      },
+      "quickActionsLabel": "Quick actions",
+      "actions": {
+        "send": "Send",
+        "addMoney": "Add money",
+        "cards": "Cards",
+        "analytics": "Analytics"
+      },
+      "actionMessages": {
+        "send": "Send money is coming soon.",
+        "addMoney": "Add money is coming soon.",
+        "cards": "Cards are coming soon.",
+        "analytics": "Analytics are coming soon."
+      },
+      "rewards": {
+        "title": "Earn rewards on every transfer",
+        "progress": "1,260 / 3,000 pts to Gold tier",
+        "redeem": "Redeem",
+        "redeemMessage": "Rewards redemption is coming soon."
+      },
+      "activity": {
+        "title": "Recent activity",
+        "filters": {
+          "all": "All",
+          "sent": "Sent",
+          "received": "Received"
+        },
+        "viewAll": "View all transactions",
+        "viewLess": "Show recent transactions",
+        "empty": "No transactions in this view yet.",
+        "transactions": [
+          {
+            "initials": "SF",
+            "name": "Spotify Premium",
+            "date": "Today, 8:42 AM",
+            "amount": "-$9.99",
+            "reference": "NX-104281",
+            "type": "sent"
+          },
+          {
+            "initials": "MC",
+            "name": "Maya Chen",
+            "date": "Yesterday, 6:15 PM",
+            "amount": "+$120.00",
+            "reference": "NX-104270",
+            "type": "received"
+          },
+          {
+            "initials": "RE",
+            "name": "Rent - October",
+            "date": "Sep 28, 9:00 AM",
+            "amount": "-$1,450.00",
+            "reference": "NX-104255",
+            "type": "sent"
+          },
+          {
+            "initials": "MR",
+            "name": "Marcus Reed",
+            "date": "Sep 27, 2:30 PM",
+            "amount": "+$35.00",
+            "reference": "NX-104247",
+            "type": "received"
+          },
+          {
+            "initials": "NF",
+            "name": "Netflix",
+            "date": "Sep 25, 12:01 AM",
+            "amount": "-$15.49",
+            "reference": "NX-104230",
+            "type": "sent"
+          },
+          {
+            "initials": "JL",
+            "name": "Jordan Lee",
+            "date": "Sep 24, 4:18 PM",
+            "amount": "+$82.50",
+            "reference": "NX-104219",
+            "type": "received"
+          },
+          {
+            "initials": "UT",
+            "name": "Utilities",
+            "date": "Sep 22, 10:06 AM",
+            "amount": "-$96.40",
+            "reference": "NX-104201",
+            "type": "sent"
+          },
+          {
+            "initials": "AB",
+            "name": "Avery Brooks",
+            "date": "Sep 20, 1:52 PM",
+            "amount": "+$64.00",
+            "reference": "NX-104188",
+            "type": "received"
+          }
+        ]
+      }
+    },
+    "payTransfer": {
+      "statusLabel": "Transfer status",
+      "statuses": {
+        "details": "Transaction details",
+        "verification": "Verification in progress",
+        "complete": "Transfer complete"
+      },
+      "steps": {
+        "recipient": "Recipient and amount",
+        "verification": "Secure verification",
+        "complete": "Confirmation"
+      },
+      "form": {
+        "eyebrow": "New transfer",
+        "title": "Send money",
+        "description": "Choose who to pay, set an amount, and add a note.",
+        "recipientLabel": "Choose a recipient",
+        "recipientInputLabel": "Recipient email or account number",
+        "recipientInputPlaceholder": "Enter an email or account number",
+        "orChooseContact": "Or choose a recent contact",
+        "amountLabel": "Amount",
+        "amountPlaceholder": "0.00",
+        "currencyCode": "USD",
+        "presetLabel": "Suggested amounts",
+        "noteLabel": "Note",
+        "noteOptional": "Optional",
+        "notePlaceholder": "Add a note for the recipient",
+        "feeLabel": "Transfer fee",
+        "totalLabel": "You send",
+        "continue": "Continue to verification",
+        "errors": {
+          "recipient": "Choose a contact or enter an email or account number.",
+          "amount": "Enter an amount greater than zero."
+        }
+      },
+      "recipients": [
+        {
+          "id": "maya",
+          "name": "Maya Chen",
+          "email": "maya.chen@example.com",
+          "initials": "MC"
+        },
+        {
+          "id": "priya",
+          "name": "Priya Shah",
+          "email": "priya.shah@example.com",
+          "initials": "PS"
+        },
+        {
+          "id": "marcus",
+          "name": "Marcus Reed",
+          "email": "marcus.reed@example.com",
+          "initials": "MR"
+        },
+        {
+          "id": "elena",
+          "name": "Elena Ruiz",
+          "email": "elena.ruiz@example.com",
+          "initials": "ER"
+        }
+      ],
+      "amountPresets": [
+        { "value": "50", "label": "$50" },
+        { "value": "100", "label": "$100" },
+        { "value": "250", "label": "$250" },
+        { "value": "500", "label": "$500" }
+      ],
+      "verification": {
+        "eyebrow": "Extra security check",
+        "title": "Verify it’s you",
+        "description": "Enter your six-digit Pay PIN to confirm this transfer.",
+        "pinLabel": "Six-digit Pay PIN",
+        "pinPlaceholder": "Enter 6-digit PIN",
+        "recipientLabel": "Sending to",
+        "previewNotice": "Demo only: no PIN will be checked and no money will move.",
+        "verify": "Verify and transfer",
+        "back": "Back to details",
+        "error": "Enter a six-digit PIN to continue."
+      },
+      "complete": {
+        "eyebrow": "Transfer complete",
+        "title": "Money sent!",
+        "description": "Your transfer preview is complete.",
+        "previewNotice": "This is a preview. No money has moved.",
+        "sentTo": "Sent to",
+        "reference": "Reference",
+        "status": "Status",
+        "completed": "Complete",
+        "sendAnother": "Send more money",
+        "backToPay": "Back to Pay home",
+        "referenceValue": "NX-829104"
+      }
+    },
+    "dashboard": {
+      "eyebrow": "Your Nexora",
+      "greeting": {
+        "morning": "Good morning, {name}.",
+        "afternoon": "Good afternoon, {name}.",
+        "evening": "Good evening, {name}."
+      },
+      "subtitle": "What would you like to do today?",
+      "statusBadge": "All systems protected",
+      "payCard": {
+        "eyebrow": "Nexora Pay",
+        "title": "Move money with confidence.",
+        "description": "Instant, protected transfers to anyone using their email or account number.",
+        "cta": "Open Pay"
+      },
+      "networkCard": {
+        "eyebrow": "Nexora Network",
+        "title": "Connect to what's next.",
+        "description": "Share ideas, grow your network, and find opportunities that move you forward.",
+        "cta": "Explore network"
+      },
+      "stats": {
+        "movedSecurely": "Moved securely",
+        "connections": "Meaningful connections",
+        "trustScore": "Trust score"
+      },
+      "promoBanner": {
+        "imageAlt": "Nexora app showing Send Money, Scan & Pay, and View History actions"
+      },
+      "featureLinks": {
+        "title": "Everything you need, in one place",
+        "subtitle": "Simple tools to help you manage your money, build your network, and explore new opportunities.",
+        "items": [
+          {
+            "title": "Send Money",
+            "description": "Transfer to friends, family or anyone securely.",
+            "href": "/pay"
+          },
+          {
+            "title": "Grow Your Network",
+            "description": "Connect with professionals and like-minded people.",
+            "href": "/network"
+          },
+          {
+            "title": "Explore Opportunities",
+            "description": "Find new opportunities that match your goals.",
+            "href": "/opportunities"
+          },
+          {
+            "title": "Learn & Discover",
+            "description": "Get insights, tips and resources to grow.",
+            "href": "/learn"
+          }
+        ]
+      }
+    }
+  },
+  "network": {
+    "subHeader": {
+      "backLabel": "Back",
+      "searchPlaceholder": "Search people, posts, jobs...",
+      "nav": {
+        "home": "Home",
+        "network": "Network",
+        "jobs": "Jobs",
+        "alerts": "Alerts"
+      }
+    },
+    "profileCard": {
+      "tagline": "Building better banking experiences, one connection at a time.",
+      "profileViews": "Profile views",
+      "connections": "Connections",
+      "myConnections": "My connections",
+      "savedJobs": "Saved jobs"
+    },
+    "composer": {
+      "placeholder": "Share an idea or update...",
+      "photo": "Photo",
+      "job": "Job",
+      "celebrate": "Celebrate",
+      "post": "Post"
+    },
+    "feed": {
+      "connectionDegree": "1st",
+      "reactionsLabel": "{count} reactions",
+      "commentsLabel": "{count} comments",
+      "repostsLabel": "{count} reposts",
+      "like": "Like",
+      "comment": "Comment",
+      "repost": "Repost",
+      "send": "Send",
+      "moreOptions": "More options"
+    },
+    "peopleToKnow": {
+      "title": "People to know",
+      "addSuggestionLabel": "Add suggestion",
+      "connect": "Connect",
+      "viewAll": "View all suggestions"
+    },
+    "weeklyInsight": {
+      "eyebrow": "Weekly insight",
+      "message": "Your profile appeared in {count} searches this week.",
+      "cta": "View analytics"
+    }
+  }
+}

@@ -16,6 +16,8 @@ public interface IUserService {
 
 	UserResponse updateUser(String email, UpdateRequest updateRequest);
 
+	List<UserResponse> getUsersById(List<String> userIds);
+
 //	// Admin methods
 //	UserResponse suspendUser(Long userId);
 //
