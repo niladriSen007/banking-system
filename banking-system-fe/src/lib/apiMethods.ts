@@ -41,7 +41,7 @@ export async function GET<T>(url: string, config?: AxiosRequestConfig) {
 
     if (
       response.data.status !== "success" ||
-      response.data.statusCode !== 200
+      ![200, 204].includes(response.data.statusCode)
     ) {
       throw new Error(getApiErrorMessage(response.data) || "Request failed");
     }
@@ -82,7 +82,7 @@ export async function PUT<TResponse, TRequest = unknown>(
 
     if (
       response.data.status !== "success" ||
-      response.data.statusCode !== 200
+      ![200, 204].includes(response.data.statusCode)
     ) {
       throw new Error(getApiErrorMessage(response.data) || "Request failed");
     }
@@ -103,7 +103,7 @@ export async function PATCH<TResponse, TRequest = unknown>(
 
     if (
       response.data.status !== "success" ||
-      response.data.statusCode !== 200
+      ![200, 204].includes(response.data.statusCode)
     ) {
       throw new Error(getApiErrorMessage(response.data) || "Request failed");
     }
@@ -122,7 +122,7 @@ export async function DELETE<TResponse>(
     const response = await api.delete<ApiResponse<TResponse>>(url, config);
     if (
       response.data.status !== "success" ||
-      response.data.statusCode !== 200
+      ![204].includes(response.data.statusCode)
     ) {
       throw new Error(getApiErrorMessage(response.data) || "Request failed");
     }

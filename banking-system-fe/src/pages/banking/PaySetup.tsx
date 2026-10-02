@@ -6,12 +6,14 @@ import {
     createPayAccountFormOpts,
     type CreatePayAccountFormValues,
 } from "@/features/pay/types";
+import { useCreatePayAccount } from "@/features/pay/hooks/useCreatePayAccount";
 import english from "@/locales/en.json";
 import { useForm } from "@tanstack/react-form";
 import {
     ArrowRight,
     Check,
     CreditCard,
+    DollarSign,
     Eye,
     EyeOff,
     LockKeyhole,
@@ -24,7 +26,6 @@ import {
     UserRound,
 } from "lucide-react";
 import { Activity, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 const paySetupText = english.banking.paySetup;
 const paySetupFieldNames = [
@@ -33,26 +34,35 @@ const paySetupFieldNames = [
   "email",
   "password",
   "upiId",
+  "initialBalance",
 ] as const satisfies readonly (keyof CreatePayAccountFormValues)[];
 
 const PaySetup = () => {
-  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const { user } = useAuthStore();
+  const { createPayAccount, isPending } = useCreatePayAccount();
 
   const defaultValues: CreatePayAccountFormValues = {
     accountHolderName: user?.name ?? "",
-    phoneNumber: "",
+    phoneNumber: user?.phoneNumber ?? "",
     email: user?.email ?? "",
     password: "",
     upiId: "",
+    initialBalance: 100,
     termsAccepted: false,
   };
 
   const { handleSubmit, Field, Subscribe } = useForm({
     ...createPayAccountFormOpts({ defaultValues }),
-    onSubmit: async () => {
-      navigate("/pay/dashboard");
+    onSubmit: async ({ value }) => {
+      await createPayAccount({
+        accountHolderName: value.accountHolderName,
+        phoneNumber: value.phoneNumber,
+        email: value.email,
+        password: value.password,
+        upiId: value.upiId,
+        initialBalance: value.initialBalance,
+      });
     },
   });
 
@@ -124,13 +134,17 @@ const PaySetup = () => {
                       ? Mail
                       : field.name === "upiId"
                         ? Send
+                        : field.name === "initialBalance"
+                          ? DollarSign
                         : LockKeyhole;
               const { errors, isTouched } = field.state.meta;
 
               return (
                 <UiField
                   className={
-                    field.name === "upiId" ? "gap-2 sm:col-span-2" : "gap-2"
+                    field.name === "upiId" || field.name === "initialBalance"
+                      ? "gap-2 sm:col-span-2"
+                      : "gap-2"
                   }
                 >
                   <FieldLabel
@@ -148,7 +162,9 @@ const PaySetup = () => {
                       id={field.name}
                       className="h-13 rounded-xl border-auth-input-border bg-auth-input-bg py-2 pl-11 pr-11 text-sm text-auth-input-text shadow-none placeholder:text-auth-input-placeholder focus-visible:border-auth-input-focus focus-visible:ring-[3px] focus-visible:ring-(--auth-input-ring)"
                       type={
-                        isPassword
+                        field.name === "initialBalance"
+                          ? "number"
+                          : isPassword
                           ? showPassword
                             ? "text"
                             : "password"
@@ -158,6 +174,13 @@ const PaySetup = () => {
                               ? "tel"
                               : "text"
                       }
+                      min={field.name === "initialBalance" ? 0 : undefined}
+                      max={
+                        field.name === "initialBalance"
+                          ? 100_000_000
+                          : undefined
+                      }
+                      step={field.name === "initialBalance" ? "0.01" : undefined}
                       name={field.name}
                       autoComplete={
                         field.name === "accountHolderName"
@@ -172,14 +195,19 @@ const PaySetup = () => {
                       }
                       disabled={
                         field.name === "email" ||
-                        field.name === "accountHolderName"
+                        field.name === "accountHolderName" ||
+                        field.name === "phoneNumber"
                       }
                       required
                       placeholder={fieldText.placeholder}
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(event) =>
-                        field.handleChange(event.target.value)
+                        field.handleChange(
+                          field.name === "initialBalance"
+                            ? Number(event.target.value)
+                            : event.target.value,
+                        )
                       }
                     />
                     {isPassword ? (
@@ -200,6 +228,7 @@ const PaySetup = () => {
                         )}
                       </Button>
                     ) : field.name === "upiId" &&
+                      typeof field.state.value === "string" &&
                       field.state.value.length > 0 &&
                       !errors?.length ? (
                       <Check
@@ -253,9 +282,9 @@ const PaySetup = () => {
               <Button
                 className="min-h-13 justify-center gap-2 rounded-xl bg-auth-button px-5 text-sm text-white shadow-[0_0.5rem_1.2rem_var(--auth-button-shadow)] hover:bg-auth-button-hover hover:shadow-[0_0.7rem_1.4rem_var(--auth-button-shadow-hover)] disabled:cursor-not-allowed disabled:opacity-60"
                 type="submit"
-                disabled={!canSubmit || isSubmitting}
+                disabled={!canSubmit || isSubmitting || isPending}
               >
-                {paySetupText.submit}
+                {isPending ? paySetupText.submitting : paySetupText.submit}
                 <ArrowRight className="size-4" aria-hidden="true" />
               </Button>
             )}

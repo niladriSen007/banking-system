@@ -1,6 +1,6 @@
 import en from "@/locales/en.json";
-import { ArrowRight, Wallet } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowRight, LoaderCircle, Wallet } from "lucide-react";
+import { useOpenPayAccount } from "@/features/pay/hooks/useOpenPayAccount";
 
 const { payCard } = en.banking.dashboard;
 
@@ -21,6 +21,8 @@ const ctaClass =
   "mt-6 inline-flex w-fit items-center gap-2 rounded-full text-sm font-medium text-white transition hover:underline";
 
 export function PaymentActionCard() {
+  const { openPayAccount, isPending } = useOpenPayAccount();
+
   return (
     <div className={cardClass}>
       <div>
@@ -32,10 +34,20 @@ export function PaymentActionCard() {
         <p className={descriptionClass}>{payCard.description}</p>
       </div>
 
-      <Link to="/pay" className={ctaClass}>
-        {payCard.cta}
-        <ArrowRight className="h-4 w-4" />
-      </Link>
+      <button
+        className={`${ctaClass} disabled:cursor-wait disabled:opacity-70`}
+        type="button"
+        disabled={isPending}
+        aria-busy={isPending}
+        onClick={() => void openPayAccount()}
+      >
+        {isPending ? payCard.loading : payCard.cta}
+        {isPending ? (
+          <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />
+        ) : (
+          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        )}
+      </button>
     </div>
   );
 }

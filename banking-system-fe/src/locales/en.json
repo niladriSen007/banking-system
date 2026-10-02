@@ -109,16 +109,25 @@
         "upiId": {
           "label": "Choose your Pay ID",
           "placeholder": "name@nexora"
+        },
+        "initialBalance": {
+          "label": "Initial balance (USD)",
+          "placeholder": "100"
         }
       },
       "showPassword": "Show password",
       "hidePassword": "Hide password",
       "terms": "I agree to the Nexora Pay terms and authorize identity verification for secure transfers.",
       "submit": "Create Pay account",
+      "submitting": "Creating Pay account...",
+      "created": "Your Pay account has been created.",
+      "createError": "We couldn't create your Pay account. Please try again.",
+      "createResponseError": "The account was created, but its details were not returned.",
       "unavailable": "Pay account creation is not connected yet. Your information has not been submitted.",
       "errors": {
         "required": "This field is required.",
         "email": "Enter a valid email address.",
+        "initialBalance": "Enter an amount from $0 to $100,000,000.",
         "terms": "Accept the terms to continue."
       }
     },
@@ -340,7 +349,9 @@
         "eyebrow": "Nexora Pay",
         "title": "Move money with confidence.",
         "description": "Instant, protected transfers to anyone using their email or account number.",
-        "cta": "Open Pay"
+        "cta": "Open Pay",
+        "loading": "Checking your Pay account...",
+        "lookupError": "We couldn't check your Pay account. Please try again."
       },
       "networkCard": {
         "eyebrow": "Nexora Network",

@@ -19,6 +19,7 @@ export const useLogin = () => {
         id: String(user.id),
         name: `${user.firstName} ${user.lastName}`.trim(),
         email: user.email,
+        phoneNumber: user.phoneNumber,
         role:
           normalizedRole === "admin" || normalizedRole === "customer"
             ? [normalizedRole]

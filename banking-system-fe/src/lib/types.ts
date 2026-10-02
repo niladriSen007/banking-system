@@ -2,7 +2,9 @@ export type ApiResponse<T> = {
     status: "success" | "error";
     statusCode: number;
     data: T | null;
-    error?: string;
+    message?: string | null;
+    timestamp?: string;
+    error?: string | null;
     meta?: Record<string, unknown>,
     errors?: ApiError[]
 }
